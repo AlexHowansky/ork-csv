@@ -70,10 +70,25 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
         ], $csv->toArray('Id'));
     }
 
-    public function testLineCount()
+    public function testLineCountHeader()
     {
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('header'),
+        ]);
+        foreach ($csv as $index => $row) {
+            $this->assertEquals($index + 2, $csv->getLineNumber());
+        }
+        // make sure count gets reset for subsequent calls w/ same object
+        foreach ($csv as $index => $row) {
+            $this->assertEquals($index + 2, $csv->getLineNumber());
+        }
+    }
+
+    public function testLineCountHeaderless()
+    {
+        $csv = new \Ork\Csv\Reader([
+            'file' => $this->getFile('headerless'),
+            'header' => false,
         ]);
         foreach ($csv as $index => $row) {
             $this->assertEquals($index + 1, $csv->getLineNumber());

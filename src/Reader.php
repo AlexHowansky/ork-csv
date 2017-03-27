@@ -74,7 +74,7 @@ class Reader implements \IteratorAggregate
      *
      * @var int
      */
-    protected $line = 0;
+    protected $line = null;
 
     /**
      * Apply callbacks.
@@ -141,7 +141,7 @@ class Reader implements \IteratorAggregate
         if ($csv === false) {
             throw new \RuntimeException('Failed to open file: ' . $this->getConfig('file'));
         }
-        $this->line = 0;
+        $this->line = 1;
         $this->columns = null;
         while (true) {
             $fields = fgetcsv(
@@ -154,7 +154,7 @@ class Reader implements \IteratorAggregate
             if ($fields === false) {
                 break;
             }
-            if ($this->line === 0 && $this->getConfig('header') === true) {
+            if ($this->line === 1 && $this->getConfig('header') === true) {
                 $this->columns = array_map(
                     function ($field) {
                         return trim($field);
