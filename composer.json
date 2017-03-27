@@ -1,0 +1,40 @@
+{
+    "name": "ork/csv",
+    "type": "library",
+    "description": "A library to read and write CSV files.",
+    "keywords": ["ork", "csv"],
+    "homepage": "http://github.com/AlexHowansky/ork-csv",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alex Howansky",
+            "email": "alex.howansky@gmail.com",
+            "homepage": "https://github.com/AlexHowansky"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "ork/core": "^1.0.0"
+    },
+    "require-dev": {
+        "mikey179/vfsStream": "^1.6.4",
+        "ork/phpcs": "^1.4.1",
+        "phpdocumentor/phpdocumentor": "^2.9.0",
+        "phpunit/phpunit": "^6.0.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ork\\Csv\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OrkTest\\Csv\\": "test/"
+        }
+    },
+    "scripts": {
+        "doc": "phpdoc -d src -t doc",
+        "phpcs": "phpcs",
+        "test": "phpunit"
+    }
+}
