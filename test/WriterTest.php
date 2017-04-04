@@ -20,6 +20,7 @@ class WriterTest extends \PHPUnit\Framework\TestCase
 
     public function setUp()
     {
+        error_reporting(E_ALL);
         $this->vfs = vfsStream::setup();
     }
 
@@ -67,6 +68,7 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      */
     public function testCreateFail()
     {
+        error_reporting(E_ALL & ~E_WARNING);
         touch($this->getTempFile());
         chmod($this->getTempFile(), 0000);
         $csv = new \Ork\Csv\Writer([

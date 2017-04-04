@@ -46,6 +46,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
 
     public function setUp()
     {
+        error_reporting(E_ALL);
         $this->vfs = vfsStream::setup();
     }
 
@@ -209,6 +210,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testBadPerms()
     {
+        error_reporting(E_ALL & ~E_WARNING);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('perms'),
         ]);
