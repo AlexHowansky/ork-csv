@@ -1,4 +1,6 @@
 [![Build Status](https://secure.travis-ci.org/AlexHowansky/ork-csv.svg?branch=master)](https://secure.travis-ci.org/AlexHowansky/ork-csv)
+[![Latest Stable Version](https://poser.pugx.org/ork/csv/v/stable)](https://packagist.org/packages/ork/csv)
+[![License](https://poser.pugx.org/ork/csv/license)](https://packagist.org/packages/ork/csv)
 
 # Ork CSV
 
