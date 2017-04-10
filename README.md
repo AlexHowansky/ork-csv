@@ -9,29 +9,35 @@ Ork CSV is a library for reading and writing CSV files.
 
 ## Installation
 
-## Via command line:
+### Via command line:
 ```bash
 $ composer require ork/csv
 ```
 
-## Via composer.json:
+### Via composer.json:
 ```json
 "require": {
     "ork/csv": "*"
 },
 ```
 
-# Generate Documentation
+## Documentation
+
+See the [wiki](https://github.com/AlexHowansky/ork-csv/wiki).
+
+## Development
+
+### Generate API Documentation
 ```bash
 $ composer doc
 ```
 
-# Testing
+### Testing
 ```bash
 $ composer test
 ```
 
-# Code Styling Validation
+### Code Styling Validation
 ```bash
 $ composer phpcs
 ```
