@@ -34,7 +34,7 @@ class Reader implements \IteratorAggregate
     protected $config = [
 
         /**
-         * Callback functions to run on the values after they're extracted. If using a header row, the array index
+         * Callback functions to be run on the values after they're extracted. If using a header row, the array index
          * should be the name of the field to apply callbacks to. Alternatively, if the index string begins with a
          * slash, it will be treated as a regex and applied to all matching fields. If not using a header row, the
          * array index should be the numerical index of the column to apply the callback(s) to. The value for each
@@ -134,10 +134,7 @@ class Reader implements \IteratorAggregate
      */
     public function getIterator(): \Generator
     {
-        if (file_exists($this->getConfig('file')) === false) {
-            throw new \RuntimeException('File does not exist: ' . $this->getConfig('file'));
-        }
-        $csv = fopen($this->getConfig('file'), 'r');
+        $csv = @fopen($this->getConfig('file'), 'r');
         if ($csv === false) {
             throw new \RuntimeException('Failed to open file: ' . $this->getConfig('file'));
         }

@@ -183,6 +183,14 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
         $csv->toArray();
     }
 
+    public function testStdin()
+    {
+        $csv = new \Ork\Csv\Reader([
+            'file' => 'php://stdin',
+        ]);
+        $this->assertEmpty($csv->toArray());
+    }
+
     /**
      * @expectedException \RuntimeException
      */
