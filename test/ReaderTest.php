@@ -183,8 +183,16 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
         $csv->toArray();
     }
 
+    /**
+     * This is kinda wonky. It looks like "composer script" sets STDIN to non-blocking, which is required for this
+     * test to pass. However, TravisCI doesn't invoke the tests via the composer wrapper, so this just hangs waiting
+     * for input. To avoid that, we'll explicitly set STDIN to non-blocking here.
+     */
     public function testStdin()
     {
+        $fh = fopen('php://stdin', 'r');
+        stream_set_blocking($fh, false);
+        fclose($fh);
         $csv = new \Ork\Csv\Reader([
             'file' => 'php://stdin',
         ]);
