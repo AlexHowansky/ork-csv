@@ -193,14 +193,10 @@ class Reader implements \IteratorAggregate
      */
     protected function map(array $fields): array
     {
-        $list = [];
         if (count($this->columns) !== count($fields)) {
             throw new \RuntimeException('Column mismatch on line: ' . $this->line);
         }
-        foreach ($this->columns as $column) {
-            $list[$column] = array_shift($fields);
-        }
-        return $list;
+        return array_combine($this->columns, $fields);
     }
 
     /**
