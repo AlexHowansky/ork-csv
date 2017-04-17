@@ -29,14 +29,14 @@ See the [wiki](https://github.com/AlexHowansky/ork-csv/wiki).
 
 ## Development
 
-### Generate API Documentation
-```bash
-$ composer doc
-```
-
 ### Testing
 ```bash
 $ composer test
+```
+
+### Generate API Documentation
+```bash
+$ composer doc
 ```
 
 ### Code Styling Validation
