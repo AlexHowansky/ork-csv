@@ -24,7 +24,7 @@ class Reader implements \IteratorAggregate
      *
      * @var array
      */
-    protected $columns = null;
+    protected $columns = [];
 
     /**
      * Configurable trait settings.
@@ -123,6 +123,27 @@ class Reader implements \IteratorAggregate
             }
             yield $row[$column];
         }
+    }
+
+    /**
+     * Get the column headers.
+     *
+     * @return array The column headers.
+     */
+    public function getColumns(): array
+    {
+
+        if ($this->getConfig('header') === false) {
+            throw new \RuntimeException('Header option is false, no columns to get');
+        }
+
+        // If we haven't pulled the column names yet, we'll need to iterate once.
+        if (empty($this->columns) === true) {
+            $this->getIterator()->current();
+        }
+
+        return $this->columns;
+
     }
 
     /**
