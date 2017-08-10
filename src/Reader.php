@@ -41,7 +41,7 @@ class Reader implements \IteratorAggregate
          * entry can be a single callable or an array of callables. Each callable should expect one parameter and
          * return one value. Example:
          *
-         * ``php
+         * ```php
          * [
          *     '/./' => 'trim',
          *     'name' => 'strtolower',
@@ -82,6 +82,8 @@ class Reader implements \IteratorAggregate
      * @param array $row The row to process.
      *
      * @return array The processed row.
+     *
+     * @throws \RuntimeException On missing column reference.
      */
     protected function applyCallbacks(array $row): array
     {
@@ -114,6 +116,8 @@ class Reader implements \IteratorAggregate
      * @param int|string $column The column to get.
      *
      * @return \Generator
+     *
+     * @throws \RuntimeException On missing column reference.
      */
     public function getColumn($column): \Generator
     {
@@ -129,6 +133,8 @@ class Reader implements \IteratorAggregate
      * Get the column headers.
      *
      * @return array The column headers.
+     *
+     * @throws \RuntimeException If we're head headerless mode.
      */
     public function getColumns(): array
     {

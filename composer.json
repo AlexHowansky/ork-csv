@@ -18,7 +18,7 @@
     },
     "require-dev": {
         "mikey179/vfsStream": "^1.6.4",
-        "ork/phpcs": "^1.4.1",
+        "ork/phpcs": "^2.0.2",
         "phpdocumentor/phpdocumentor": "^2.9.0",
         "phpunit/phpunit": "^6.0.10"
     },
