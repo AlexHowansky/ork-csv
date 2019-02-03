@@ -5,6 +5,7 @@
     xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/8.0/phpunit.xsd"
     bootstrap="vendor/autoload.php"
     printerClass="PHPUnit\Util\TestDox\CliTestDoxPrinter"
+    convertWarningsToExceptions="false"
 >
 
     <testsuite name="Ork CSV">

@@ -70,6 +70,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function setUp(): void
     {
+        error_reporting(E_ALL & ~E_WARNING);
         $this->vfs = vfsStream::setup();
     }
 
@@ -80,7 +81,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testBadFile()
     {
-        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
+        $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('bad'),
         ]);
@@ -94,7 +95,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testBadPerms()
     {
-        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
+        $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('perms'),
         ]);
@@ -330,7 +331,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testMismatchFile()
     {
-        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
+        $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('mismatch'),
         ]);
@@ -344,7 +345,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testMissingFile()
     {
-        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
+        $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('noneSuch'),
         ]);
