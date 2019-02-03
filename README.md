@@ -1,22 +1,27 @@
-[![Build Status](https://secure.travis-ci.org/AlexHowansky/ork-csv.svg?branch=master)](https://secure.travis-ci.org/AlexHowansky/ork-csv)
-[![Latest Stable Version](https://poser.pugx.org/ork/csv/v/stable)](https://packagist.org/packages/ork/csv)
-[![License](https://poser.pugx.org/ork/csv/license)](https://packagist.org/packages/ork/csv)
-
 # Ork CSV
 
 Ork CSV is a library for reading and writing CSV files.
 
+[![Latest Stable Version](https://img.shields.io/packagist/v/ork/csv.svg?style=flat)](https://packagist.org/packages/ork/csv)
+[![PHPStan Enabled](https://img.shields.io/badge/PHPStan-max-brightgreen.svg?style=flat)](https://github.com/phpstan/phpstan)
+[![PHP](https://img.shields.io/packagist/php-v/ork/csv.svg?style=flat)](http://php.net)
+[![License](https://img.shields.io/github/license/AlexHowansky/ork-csv.svg?style=flat)](https://github.com/AlexHowansky/ork-csv/blob/master/LICENSE)
+[![Build Status](https://img.shields.io/travis/AlexHowansky/ork-csv/master.svg?style=flat)](https://secure.travis-ci.org/AlexHowansky/ork-csv)
+
 ## Requirements
-* PHP 7.1
+
+* PHP 7.2
 
 ## Installation
 
-### Via command line:
+### Via command line
+
 ```bash
-$ composer require ork/csv
+composer require ork/csv
 ```
 
-### Via composer.json:
+### Via composer.json
+
 ```json
 "require": {
     "ork/csv": "*"
@@ -25,21 +30,33 @@ $ composer require ork/csv
 
 ## Documentation
 
-See the [wiki](https://github.com/AlexHowansky/ork-csv/wiki).
+See the [docs](docs/Index.md) directory.
 
 ## Development
 
-### Testing
+### Coding Style Validation
+
+Coding style validation is performed by [PHP CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer).
+A compser alias is provided to run the validation.
+
 ```bash
-$ composer test
+composer phpcs
 ```
 
-### Generate API Documentation
+### Static Analysis
+
+Static analysis is performed by [PHPStan](https://github.com/phpstan/phpstan).
+A composer alias is provided to run the analysis.
+
 ```bash
-$ composer doc
+composer phpstan
 ```
 
-### Code Styling Validation
+### Unit Testing
+
+Unit testing is performed by [PHPUnit](https://github.com/sebastianbergmann/phpunit).
+A composer alias is provided to run the tests.
+
 ```bash
-$ composer phpcs
+composer test
 ```

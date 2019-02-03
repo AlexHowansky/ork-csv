@@ -91,7 +91,7 @@ class Reader implements \IteratorAggregate
             if (strpos($column, '/') === 0) {
                 // Interpret as a regex and apply to all matching columns.
                 foreach (array_keys($row) as $name) {
-                    if (preg_match($column, $name) === 1) {
+                    if (preg_match($column, (string) $name) === 1) {
                         foreach ((array) $callbacks as $callback) {
                             $row[$name] = call_user_func($callback, $row[$name]);
                         }
@@ -161,12 +161,12 @@ class Reader implements \IteratorAggregate
      */
     public function getIterator(): \Generator
     {
-        $csv = @fopen($this->getConfig('file'), 'r');
+        $csv = fopen($this->getConfig('file'), 'r');
         if ($csv === false) {
             throw new \RuntimeException('Failed to open file: ' . $this->getConfig('file'));
         }
         $this->line = 1;
-        $this->columns = null;
+        $this->columns = [];
         while (true) {
             $fields = fgetcsv(
                 $csv,
@@ -175,7 +175,7 @@ class Reader implements \IteratorAggregate
                 $this->getConfig('quote'),
                 $this->getConfig('escape')
             );
-            if ($fields === false) {
+            if ($fields === false || $fields === null) {
                 break;
             }
             if ($this->line === 1 && $this->getConfig('header') === true) {
@@ -220,10 +220,11 @@ class Reader implements \IteratorAggregate
      */
     protected function map(array $fields): array
     {
-        if (count($this->columns) !== count($fields)) {
+        $result = array_combine($this->columns, $fields);
+        if ($result === false) {
             throw new \RuntimeException('Column mismatch on line: ' . $this->line);
         }
-        return array_combine($this->columns, $fields);
+        return $result;
     }
 
     /**

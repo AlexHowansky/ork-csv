@@ -38,7 +38,7 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         error_reporting(E_ALL);
         $this->vfs = vfsStream::setup();
@@ -48,11 +48,10 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      * Test that we detect failure to create the output file.
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testCreateFail()
     {
+        $this->expectException(\RuntimeException::class);
         error_reporting(E_ALL & ~E_WARNING);
         touch($this->getTempFile());
         chmod($this->getTempFile(), 0000);
@@ -108,11 +107,10 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      * Test that we detect failure to write to the output file.
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testWriteFail()
     {
+        $this->expectException(\RuntimeException::class);
         vfsStream::setQuota(1);
         $csv = new \Ork\Csv\Writer([
             'file' => $this->getTempFile(),

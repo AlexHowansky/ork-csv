@@ -68,9 +68,8 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
-        error_reporting(E_ALL);
         $this->vfs = vfsStream::setup();
     }
 
@@ -78,11 +77,10 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      * Test that we detect non-csv files.
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testBadFile()
     {
+        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('bad'),
         ]);
@@ -93,12 +91,10 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      * Test that we can't read a file with restrictive perms.
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testBadPerms()
     {
-        error_reporting(E_ALL & ~E_WARNING);
+        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('perms'),
         ]);
@@ -109,11 +105,10 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      * Test that we detect a callback on a missing column
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testCallbackOnMissingColumn()
     {
+        $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('callbacks'),
             'callbacks' => [
@@ -173,11 +168,10 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      * Test that referencing a bad column in a headerless file fails.
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testGetBadColumnViaInt()
     {
+        $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('headerless'),
             'header' => false,
@@ -189,11 +183,10 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      * Test that getting a bad column from a header file fails.
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testGetBadColumnViaString()
     {
+        $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('header'),
         ]);
@@ -246,11 +239,10 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      * Test that we can't get the columns from a headerless file.
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testGetColumnsHeaderless()
     {
+        $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('headerless'),
             'header' => false,
@@ -335,11 +327,10 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      * Test that we detect a column mismatch.
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testMismatchFile()
     {
+        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('mismatch'),
         ]);
@@ -350,11 +341,10 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      * Test that we can't reference files that don't exist.
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testMissingFile()
     {
+        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('noneSuch'),
         ]);
@@ -365,11 +355,10 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      * Test that we detect bad headers.
      *
      * @return void
-     *
-     * @expectedException \RuntimeException
      */
     public function testNotUniqueHeaderFile()
     {
+        $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('notUniqueHeader'),
         ]);

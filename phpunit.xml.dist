@@ -2,34 +2,26 @@
 
 <phpunit
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.0/phpunit.xsd"
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/8.0/phpunit.xsd"
     bootstrap="vendor/autoload.php"
-    colors="true"
+    printerClass="PHPUnit\Util\TestDox\CliTestDoxPrinter"
 >
 
     <testsuite name="Ork CSV">
-        <directory>./test/</directory>
+        <directory>./tests/</directory>
     </testsuite>
 
     <filter>
         <whitelist>
             <directory>./src/</directory>
             <exclude>
-                <directory>./test/</directory>
+                <directory>./tests/</directory>
             </exclude>
         </whitelist>
     </filter>
 
     <logging>
-        <log
-            type="coverage-html"
-            target="./coverage"
-            lowUpperBound="35"
-            highLowerBound="70"
-            charset="UTF-8"
-            yui="true"
-            highlight="true"
-        />
+        <log type="coverage-html" target="./coverage" lowUpperBound="35" highLowerBound="70" />
     </logging>
 
 </phpunit>
