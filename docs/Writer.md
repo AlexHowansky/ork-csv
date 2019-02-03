@@ -9,8 +9,7 @@ Its configuration attributes are as follows:
 
 |Name|Type|Description|
 |----|----|-----------|
-|columns|array|The column names for the header row. If not provided, the keys
-from the first array passed to the write() method will be used.
+|columns|array|The column names for the header row. If not provided, the keys from the first array passed to the write() method will be used.|
 |delimiter|string|The field delimiter character. Defaults to comma: `,`|
 |escape|string|The escape character. Defaults to blackslash: `\`|
 |file|string|The file to process. Defaults to: `php://stdin`|

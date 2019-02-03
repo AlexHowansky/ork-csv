@@ -9,14 +9,7 @@ Its configuration attributes are as follows:
 
 |Name|Type|Description|
 |----|----|-----------|
-|callbacks|array|Defines callback functions to be run on the values after
-they're extracted. If using a header row, the array index should be the name
-of the field to apply callbacks to. Alternatively, if the index string begins
-with a slash, it will be treated as a regex and applied to all matching fields.
-If not using a header row, the array index should be the numerical index
-(0-based) of the column to apply the callback(s) to. The value for each entry
-can be a single callable or an array of callables. Each callable should expect
-one parameter and return one value.
+|callbacks|array|Defines callback functions to be run on the values after they're extracted. If using a header row, the array index should be the name of the field to apply callbacks to. Alternatively, if the index string begins with a slash, it will be treated as a regex and applied to all matching fields.  If not using a header row, the array index should be the numerical index (0-based) of the column to apply the callback(s) to. The value for each entry can be a single callable or an array of callables. Each callable should expect one parameter and return one value.|
 |delimiter|string|The field delimiter character. Defaults to comma: `,`|
 |escape|string|The escape character. Defaults to blackslash: `\`|
 |file|string|The file to process. Defaults to: `php://stdin`|
