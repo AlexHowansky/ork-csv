@@ -17,8 +17,8 @@
         "ork/core": "^1.0.2"
     },
     "require-dev": {
-        "mikey179/vfsStream": "^1.6.5",
-        "ork/phpcs": "^2.0.8",
+        "mikey179/vfsstream": "^1.6.5",
+        "ork/phpcs": "^2.0.9",
         "phpstan/phpstan": "^0.11.1",
         "phpunit/phpunit": "^8.0.2"
     },

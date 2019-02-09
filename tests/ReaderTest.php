@@ -37,7 +37,6 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     {
         $file = $this->vfs->url() . '/' . $name . '.csv';
         $content = [
-            'bad' => random_bytes(1024),
             'callbacks' => "Id,Name\n1,Foo\n2, Bar\n3, BAZ \n",
             'header' => "Id , Name, Number\n1,Foo,37\n2,Bar,142\n3,Baz,71\n",
             'headerless' => "1,2,3,4,5\n6,7,8,9,10\n",
@@ -75,20 +74,6 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     {
         error_reporting(E_ALL & ~E_WARNING);
         $this->vfs = vfsStream::setup();
-    }
-
-    /**
-     * Test that we detect non-csv files.
-     *
-     * @return void
-     */
-    public function testBadFile()
-    {
-        $this->expectException(\RuntimeException::class);
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('bad'),
-        ]);
-        $csv->toArray();
     }
 
     /**
