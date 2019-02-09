@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.1
+
+* Make sure we have unique names when overriding columns.
+
 ## 1.1.0
 
 * Added the ability to provide column names when reading headerless files,

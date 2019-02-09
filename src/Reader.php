@@ -109,6 +109,23 @@ class Reader implements \IteratorAggregate
     }
 
     /**
+     * Make sure we have unique column names.
+     *
+     * @param array $columns The column names.
+     *
+     * @return array
+     *
+     * @throws \RuntimeException If column names are not unique.
+     */
+    protected function filterConfigColumns(array $columns): array
+    {
+        if (count($columns) !== count(array_unique($columns))) {
+            throw new \RuntimeException('Column names must be unique.');
+        }
+        return $columns;
+    }
+
+    /**
      * Get one column.
      *
      * @param int|string $column The column to get.
@@ -161,7 +178,7 @@ class Reader implements \IteratorAggregate
         if ($csv === false) {
             throw new \RuntimeException('Failed to open file: ' . $this->getConfig('file'));
         }
-        $this->line = 1;
+        $this->line = 0;
         while (true) {
             $fields = fgetcsv(
                 $csv,
@@ -173,7 +190,7 @@ class Reader implements \IteratorAggregate
             if ($fields === false || $fields === null) {
                 break;
             }
-            if ($this->line === 1 && $this->getConfig('header') === true) {
+            if (++$this->line === 1 && $this->getConfig('header') === true) {
                 if (empty($this->getConfig('columns')) === true) {
                     $this->setConfig(
                         'columns',
@@ -184,17 +201,10 @@ class Reader implements \IteratorAggregate
                             $fields
                         )
                     );
-                    if (count($this->getConfig('columns')) !== count(array_unique($this->getConfig('columns')))) {
-                        throw new \RuntimeException(
-                            'File does not have unique column headers: ' . $this->getConfig('file')
-                        );
-                    }
                 }
             } else {
-                $row = $this->map($fields);
-                yield empty($this->getConfig('callbacks')) === true ? $row : $this->applyCallbacks($row);
+                yield $this->applyCallbacks($this->map($fields));
             }
-            ++$this->line;
         }
         fclose($csv);
     }

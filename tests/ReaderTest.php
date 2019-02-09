@@ -331,10 +331,12 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
         foreach ($csv as $index => $row) {
             $this->assertSame($index + 2, $csv->getLineNumber());
         }
+        $this->assertSame(4, $csv->getLineNumber());
         // Make sure count gets reset for subsequent calls w/ same object.
         foreach ($csv as $index => $row) {
             $this->assertSame($index + 2, $csv->getLineNumber());
         }
+        $this->assertSame(4, $csv->getLineNumber());
     }
 
     /**
@@ -394,6 +396,22 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
         $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('noneSuch'),
+        ]);
+        $csv->toArray();
+    }
+
+    /**
+     * Test that using non-unique columns fails.
+     *
+     * @return void
+     */
+    public function testNonUniqueColumn()
+    {
+        $this->expectException(\RuntimeException::class);
+        $csv = new \Ork\Csv\Reader([
+            'file' => $this->getFile('headerless'),
+            'header' => false,
+            'columns' => ['one', 'one', 'two', 'three', 'four'],
         ]);
         $csv->toArray();
     }
