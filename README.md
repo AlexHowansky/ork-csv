@@ -30,7 +30,27 @@ composer require ork/csv
 
 ## Documentation
 
-See the [docs](docs/Index.md) directory.
+Consider a CSV containing:
+
+    Id,Name
+    1,foo
+    2,bar
+
+A reader object will provide a generator that yields one row per iteration.
+Each row will consist of an associative array indexed by the values provided
+in the file's header row. Basic usage is simple:
+
+```php
+$csv = new \Ork\Csv\Reader([
+    'file' => '/path/to/file.csv',
+]);
+foreach ($csv as $row) {
+    echo "id is: " . $row['Id'] . "\n";
+    echo "name is: " . $row['Name'] . "\n";
+}
+```
+
+See the [docs](docs/Index.md) directory for full details.
 
 ## Development
 
