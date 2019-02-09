@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.1.0
+
+* Added the ability to provide column names when reading headerless files,
+  and override column names when reading headered files.
+
 ## 1.0.3
 
 * Updated dependecies.

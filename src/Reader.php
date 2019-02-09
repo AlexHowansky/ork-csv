@@ -20,13 +20,6 @@ class Reader implements \IteratorAggregate
     use \Ork\Core\ConfigurableTrait;
 
     /**
-     * Contains the column names from the header row.
-     *
-     * @var array
-     */
-    protected $columns = [];
-
-    /**
      * Configurable trait settings.
      *
      * @var array
@@ -39,18 +32,20 @@ class Reader implements \IteratorAggregate
          * slash, it will be treated as a regex and applied to all matching fields. If not using a header row, the
          * array index should be the numerical index of the column to apply the callback(s) to. The value for each
          * entry can be a single callable or an array of callables. Each callable should expect one parameter and
-         * return one value. Example:
+         * return one value. For example:
          *
-         * ```php
          * [
          *     '/./' => 'trim',
          *     'name' => 'strtolower',
          *     'email' => ['strtolower', 'trim'],
          *     'phone' => [[$someObject, 'methodName']],
          * ]
-         * ```
          */
         'callbacks' => [],
+
+        // The column names to assign. If `header` is true and this is empty, the values from the header row are used.
+        // If `header` is true and this is not empty, these values are used instead.
+        'columns' => [],
 
         // The field delimiter character.
         'delimiter' => ',',
@@ -74,7 +69,7 @@ class Reader implements \IteratorAggregate
      *
      * @var int
      */
-    protected $line = null;
+    protected $line = 0;
 
     /**
      * Apply callbacks.
@@ -88,8 +83,9 @@ class Reader implements \IteratorAggregate
     protected function applyCallbacks(array $row): array
     {
         foreach ($this->getConfig('callbacks') as $column => $callbacks) {
+
+            // Interpret as a regex and apply to all matching columns.
             if (strpos($column, '/') === 0) {
-                // Interpret as a regex and apply to all matching columns.
                 foreach (array_keys($row) as $name) {
                     if (preg_match($column, (string) $name) === 1) {
                         foreach ((array) $callbacks as $callback) {
@@ -97,15 +93,17 @@ class Reader implements \IteratorAggregate
                         }
                     }
                 }
-            } else {
-                // Apply to one explicitly named column.
-                if (array_key_exists($column, $row) === false) {
-                    throw new \RuntimeException('Unable to apply callback to missing column: ' . $column);
-                }
-                foreach ((array) $callbacks as $callback) {
-                    $row[$column] = call_user_func($callback, $row[$column]);
-                }
+                continue;
             }
+
+            // Apply to one explicitly named column.
+            if (array_key_exists($column, $row) === false) {
+                throw new \RuntimeException('Unable to apply callback to missing column: ' . $column);
+            }
+            foreach ((array) $callbacks as $callback) {
+                $row[$column] = call_user_func($callback, $row[$column]);
+            }
+
         }
         return $row;
     }
@@ -133,22 +131,20 @@ class Reader implements \IteratorAggregate
      * Get the column headers.
      *
      * @return array The column headers.
-     *
-     * @throws \RuntimeException If we're head headerless mode.
      */
     public function getColumns(): array
     {
 
-        if ($this->getConfig('header') === false) {
-            throw new \RuntimeException('Header option is false, no columns to get');
-        }
-
-        // If we haven't pulled the column names yet, we'll need to iterate once.
-        if (empty($this->columns) === true) {
+        // We might have to iterate once to get the header row.
+        if (
+            $this->line === 0 &&
+            $this->getConfig('header') === true &&
+            empty($this->getConfig('columns')) === true
+        ) {
             $this->getIterator()->current();
         }
 
-        return $this->columns;
+        return $this->getConfig('columns');
 
     }
 
@@ -166,7 +162,6 @@ class Reader implements \IteratorAggregate
             throw new \RuntimeException('Failed to open file: ' . $this->getConfig('file'));
         }
         $this->line = 1;
-        $this->columns = [];
         while (true) {
             $fields = fgetcsv(
                 $csv,
@@ -179,19 +174,24 @@ class Reader implements \IteratorAggregate
                 break;
             }
             if ($this->line === 1 && $this->getConfig('header') === true) {
-                $this->columns = array_map(
-                    function ($field) {
-                        return trim($field);
-                    },
-                    $fields
-                );
-                if (count($this->columns) !== count(array_unique($this->columns))) {
-                    throw new \RuntimeException(
-                        'File does not have unique column headers: ' . $this->getConfig('file')
+                if (empty($this->getConfig('columns')) === true) {
+                    $this->setConfig(
+                        'columns',
+                        array_map(
+                            function ($field) {
+                                return trim($field);
+                            },
+                            $fields
+                        )
                     );
+                    if (count($this->getConfig('columns')) !== count(array_unique($this->getConfig('columns')))) {
+                        throw new \RuntimeException(
+                            'File does not have unique column headers: ' . $this->getConfig('file')
+                        );
+                    }
                 }
             } else {
-                $row = $this->getConfig('header') === true ? $this->map($fields) : $fields;
+                $row = $this->map($fields);
                 yield empty($this->getConfig('callbacks')) === true ? $row : $this->applyCallbacks($row);
             }
             ++$this->line;
@@ -220,7 +220,10 @@ class Reader implements \IteratorAggregate
      */
     protected function map(array $fields): array
     {
-        $result = array_combine($this->columns, $fields);
+        if (empty($this->getConfig('columns')) === true) {
+            return $fields;
+        }
+        $result = array_combine($this->getConfig('columns'), $fields);
         if ($result === false) {
             throw new \RuntimeException('Column mismatch on line: ' . $this->line);
         }

@@ -13,6 +13,9 @@ namespace OrkTest\Csv;
 
 use org\bovigo\vfs\vfsStream;
 
+/**
+ * Test the Reader class.
+ */
 class ReaderTest extends \PHPUnit\Framework\TestCase
 {
 
@@ -30,7 +33,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return string
      */
-    protected function getFile($name)
+    protected function getFile(string $name): string
     {
         $file = $this->vfs->url() . '/' . $name . '.csv';
         $content = [
@@ -58,7 +61,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return string The reversed string.
      */
-    public function reverse($value)
+    public function reverse(string $value): string
     {
         return strrev($value);
     }
@@ -237,18 +240,32 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test that we can't get the columns from a headerless file.
+     * Test that we get empty columns from a headerless file.
      *
      * @return void
      */
     public function testGetColumnsHeaderless()
     {
-        $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('headerless'),
             'header' => false,
         ]);
-        $csv->getColumns();
+        $this->assertEmpty($csv->getColumns());
+    }
+
+    /**
+     * Test that we can override the columns of a file with headers.
+     *
+     * @return void
+     */
+    public function testHeaderColumnOverride()
+    {
+        $csv = new \Ork\Csv\Reader([
+            'file' => $this->getFile('header'),
+            'columns' => ['one', 'two', 'three'],
+        ]);
+        $this->assertEquals([1, 2, 3], iterator_to_array($csv->getColumn('one')));
+        $this->assertSame(['Foo', 'Bar', 'Baz'], iterator_to_array($csv->getColumn('two')));
     }
 
     /**
@@ -272,6 +289,22 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test that we can specify the colunms of a file without headers.
+     *
+     * @return void
+     */
+    public function testHeaderlessColumnExplicit()
+    {
+        $csv = new \Ork\Csv\Reader([
+            'file' => $this->getFile('headerless'),
+            'header' => false,
+            'columns' => ['one', 'two', 'three', 'four', 'five'],
+        ]);
+        $this->assertEquals([1, 6], iterator_to_array($csv->getColumn('one')));
+        $this->assertEquals([5, 10], iterator_to_array($csv->getColumn('five')));
+    }
+
+    /**
      * Test that we properly read a headerless file.
      *
      * @return void
@@ -282,7 +315,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
             'file' => $this->getFile('headerless'),
             'header' => false,
         ]);
-        $this->assertEquals([[1,2,3,4,5], [6,7,8,9,10]], $csv->toArray());
+        $this->assertEquals([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]], $csv->toArray());
     }
 
     /**
@@ -296,11 +329,11 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
             'file' => $this->getFile('header'),
         ]);
         foreach ($csv as $index => $row) {
-            $this->assertEquals($index + 2, $csv->getLineNumber());
+            $this->assertSame($index + 2, $csv->getLineNumber());
         }
-        // make sure count gets reset for subsequent calls w/ same object
+        // Make sure count gets reset for subsequent calls w/ same object.
         foreach ($csv as $index => $row) {
-            $this->assertEquals($index + 2, $csv->getLineNumber());
+            $this->assertSame($index + 2, $csv->getLineNumber());
         }
     }
 
@@ -316,12 +349,25 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
             'header' => false,
         ]);
         foreach ($csv as $index => $row) {
-            $this->assertEquals($index + 1, $csv->getLineNumber());
+            $this->assertSame($index + 1, $csv->getLineNumber());
         }
-        // make sure count gets reset for subsequent calls w/ same object
+        // Make sure count gets reset for subsequent calls w/ same object.
         foreach ($csv as $index => $row) {
-            $this->assertEquals($index + 1, $csv->getLineNumber());
+            $this->assertSame($index + 1, $csv->getLineNumber());
         }
+    }
+
+    /**
+     * Test that the line number is zero before we start.
+     *
+     * @return void
+     */
+    public function testLineNumberZeroBeforeStart()
+    {
+        $csv = new \Ork\Csv\Reader([
+            'file' => $this->getFile('header'),
+        ]);
+        $this->assertSame(0, $csv->getLineNumber());
     }
 
     /**
@@ -374,15 +420,18 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      * for input. To avoid that, we'll explicitly set STDIN to non-blocking here.
      *
      * @return void
+     *
+     * @throws \RuntimeException On error.
      */
     public function testStdin()
     {
         $fh = fopen('php://stdin', 'r');
+        if ($fh === false) {
+            throw new \RuntimeException('STDIN open failed');
+        }
         stream_set_blocking($fh, false);
         fclose($fh);
-        $csv = new \Ork\Csv\Reader([
-            'file' => 'php://stdin',
-        ]);
+        $csv = new \Ork\Csv\Reader(['file' => 'php://stdin']);
         $this->assertEmpty($csv->toArray());
     }
 

@@ -2,4 +2,5 @@
 <ruleset name="Ork CSV">
     <rule ref="vendor/ork/phpcs/Ork"/>
     <file>src</file>
+    <file>tests</file>
 </ruleset>
