@@ -17,10 +17,10 @@
         "ork/core": "^1.0.2"
     },
     "require-dev": {
-        "mikey179/vfsstream": "^1.6.5",
-        "ork/phpcs": "^2.0.9",
-        "phpstan/phpstan": "^0.11.1",
-        "phpunit/phpunit": "^8.0.2"
+        "mikey179/vfsstream": "^1.6.8",
+        "ork/phpcs": "^2.1.0",
+        "phpstan/phpstan": "^0.11.19",
+        "phpunit/phpunit": "^8.5.2"
     },
     "autoload": {
         "psr-4": {

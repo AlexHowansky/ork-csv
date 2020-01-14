@@ -183,6 +183,33 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test that we can get the columns from a header file.
+     *
+     * @return void
+     */
+    public function testGetColumns()
+    {
+        $csv = new \Ork\Csv\Reader([
+            'file' => $this->getFile('header'),
+        ]);
+        $this->assertEquals(['Id', 'Name', 'Number'], $csv->getColumns());
+    }
+
+    /**
+     * Test that we get empty columns from a headerless file.
+     *
+     * @return void
+     */
+    public function testGetColumnsHeaderless()
+    {
+        $csv = new \Ork\Csv\Reader([
+            'file' => $this->getFile('headerless'),
+            'header' => false,
+        ]);
+        $this->assertEmpty($csv->getColumns());
+    }
+
+    /**
      * Test that we can get a column from a headerless file by integer.
      *
      * @return void
@@ -209,33 +236,6 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
         ]);
         $this->assertEquals([1, 2, 3], iterator_to_array($csv->getColumn('Id')));
         $this->assertSame(['Foo', 'Bar', 'Baz'], iterator_to_array($csv->getColumn('Name')));
-    }
-
-    /**
-     * Test that we can get the columns from a header file.
-     *
-     * @return void
-     */
-    public function testGetColumns()
-    {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('header'),
-        ]);
-        $this->assertEquals(['Id', 'Name', 'Number'], $csv->getColumns());
-    }
-
-    /**
-     * Test that we get empty columns from a headerless file.
-     *
-     * @return void
-     */
-    public function testGetColumnsHeaderless()
-    {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('headerless'),
-            'header' => false,
-        ]);
-        $this->assertEmpty($csv->getColumns());
     }
 
     /**
