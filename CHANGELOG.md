@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.0
+
+* Added callbacks feature to Writer.
+
 ## 1.1.1
 
 * Make sure we have unique names when overriding columns.
