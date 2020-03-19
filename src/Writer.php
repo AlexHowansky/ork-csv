@@ -4,7 +4,7 @@
  * Ork CSV
  *
  * @package   Ork\Csv
- * @copyright 2015-2019 Alex Howansky (https://github.com/AlexHowansky)
+ * @copyright 2015-2020 Alex Howansky (https://github.com/AlexHowansky)
  * @license   https://github.com/AlexHowansky/ork-csv/blob/master/LICENSE MIT License
  * @link      https://github.com/AlexHowansky/ork-csv
  */
@@ -14,10 +14,8 @@ namespace Ork\Csv;
 /**
  * CSV writer.
  */
-class Writer
+class Writer extends CsvAbstract
 {
-
-    use \Ork\Core\ConfigurableTrait;
 
     /**
      * Contains the column names from the header row.
@@ -32,6 +30,23 @@ class Writer
      * @var array
      */
     protected $config = [
+
+        /**
+         * Callback functions to be run on the values before they're output. If using a header row, the array index
+         * should be the name of the field to apply callbacks to. Alternatively, if the index string begins with a
+         * slash, it will be treated as a regex and applied to all matching fields. If not using a header row, the
+         * array index should be the numerical index of the column to apply the callback(s) to. The value for each
+         * entry can be a single callable or an array of callables. Each callable should expect one parameter and
+         * return one value. For example:
+         *
+         * [
+         *     '/./' => 'trim',
+         *     'name' => 'strtolower',
+         *     'email' => ['strtolower', 'trim'],
+         *     'phone' => [[$someObject, 'methodName']],
+         * ]
+         */
+        'callbacks' => [],
 
         // The column names for the header row. If not provided, we'll use the keys from the first array passed to the
         // write() method.
@@ -82,7 +97,6 @@ class Writer
      */
     protected function put(array $row): int
     {
-
         $result = fputcsv(
             $this->csv,
             $row,
@@ -125,7 +139,7 @@ class Writer
         // If we're not using a header row, just output the values. The caller will have to ensure the proper column
         // order.
         if ($this->getConfig('header') === false) {
-            return $this->put(array_values($row));
+            return $this->put(array_values($this->applyCallbacks($row)));
         }
 
         // Output the header row if we haven't already.
@@ -133,6 +147,8 @@ class Writer
             $this->columns = $this->getConfig('columns') === null ? array_keys($row) : $this->getConfig('columns');
             $this->put($this->columns);
         }
+
+        $row = $this->applyCallbacks($row);
 
         // If this data row doesn't contain values for all the fields in the header row, then insert empty values for
         // the missing fields, so that the CSV columns line up properly. Also, make sure that the columns are in the

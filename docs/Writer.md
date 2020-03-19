@@ -9,6 +9,7 @@ Its configuration attributes are as follows:
 
 |Name|Type|Description|
 |----|----|-----------|
+|callbacks|array|Defines callback functions to be run on the values before they're written. If using column names, the array index should be the name of the column to apply callbacks to. Alternatively, if the index string begins with a slash, it will be treated as a regex and applied to all matching columns. If not using column names, the array index should be the numerical index (0-based) of the column to apply the callback(s) to. The value for each entry can be a single callable or an array of callables. Each callable should expect one parameter and return one value.|
 |columns|array|The column names for the header row. If not provided, the keys from the first array passed to the write() method will be used.|
 |delimiter|string|The field delimiter character. Defaults to comma: `,`|
 |escape|string|The escape character. Defaults to blackslash: `\`|

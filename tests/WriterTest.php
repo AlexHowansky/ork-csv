@@ -4,7 +4,7 @@
  * Ork CSV
  *
  * @package   OrkTest\Csv
- * @copyright 2015-2019 Alex Howansky (https://github.com/AlexHowansky)
+ * @copyright 2015-2020 Alex Howansky (https://github.com/AlexHowansky)
  * @license   https://github.com/AlexHowansky/ork-csv/blob/master/LICENSE MIT License
  * @link      https://github.com/AlexHowansky/ork-csv
  */
@@ -37,6 +37,18 @@ class WriterTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Wrapper method for filter callable.
+     *
+     * @param string $value The string to reverse.
+     *
+     * @return string The reversed string.
+     */
+    public function reverse(string $value): string
+    {
+        return strrev($value);
+    }
+
+    /**
      * Set up each test.
      *
      * @return void
@@ -45,6 +57,87 @@ class WriterTest extends \PHPUnit\Framework\TestCase
     {
         error_reporting(E_ALL);
         $this->vfs = vfsStream::setup();
+    }
+
+    /**
+     * Test that we detect a callback on a missing column
+     *
+     * @return void
+     */
+    public function testCallbackOnMissingColumn()
+    {
+        $this->expectException(\RuntimeException::class);
+        $csv = new \Ork\Csv\Writer([
+            'file' => $this->getTempFile(),
+            'callbacks' => [
+                'Foo' => ['trim'],
+            ],
+        ]);
+        $csv->write(['Id' => 1, 'Name' => 'Foo']);
+        unset($csv);
+    }
+
+    /**
+     * Test that regex callbacks work.
+     *
+     * @return void
+     */
+    public function testCallbackRegex()
+    {
+        $csv = new \Ork\Csv\Writer([
+            'file' => $this->getTempFile(),
+            'callbacks' => [
+                '/e/' => ['strtolower', 'trim', [$this, 'reverse']],
+            ],
+        ]);
+        $csv->write(['Id' => 1000, 'Name' => ' FOO ']);
+        $csv->write(['Id' => 2000, 'Name' => ' Bar ']);
+        $csv->write(['Id' => 3000, 'Name' => 'baz']);
+        unset($csv);
+        $this->assertSame('ac2235527f6b65b87b4ba26f2af0480a', md5_file($this->getTempFile()));
+    }
+
+    /**
+     * Test that callbacks work on files with headers.
+     *
+     * @return void
+     */
+    public function testCallbacksWithHeader()
+    {
+        $csv = new \Ork\Csv\Writer([
+            'file' => $this->getTempFile(),
+            'callbacks' => [
+                'Id' => 'number_format',
+                'Name' => ['strtolower', 'trim', [$this, 'reverse']],
+            ],
+        ]);
+        $csv->write(['Id' => 1000, 'Name' => ' FOO ']);
+        $csv->write(['Id' => 2000, 'Name' => ' Bar ']);
+        $csv->write(['Id' => 3000, 'Name' => 'baz']);
+        unset($csv);
+        $this->assertSame('58c1fd79167879b4b096cf6b9390bed4', md5_file($this->getTempFile()));
+    }
+
+    /**
+     * Test that callbacks work on files without headers.
+     *
+     * @return void
+     */
+    public function testCallbacksWithoutHeader()
+    {
+        $csv = new \Ork\Csv\Writer([
+            'file' => $this->getTempFile(),
+            'header' => false,
+            'callbacks' => [
+                0 => 'strtolower',
+                1 => ['strtolower', 'trim', [$this, 'reverse']],
+            ],
+        ]);
+        $csv->write([' FOO ', ' FOO ']);
+        $csv->write([' Bar ', ' Bar ']);
+        $csv->write(['baz', 'baz']);
+        unset($csv);
+        $this->assertSame('828b52089cff436139a64b135ef6ddc0', md5_file($this->getTempFile()));
     }
 
     /**

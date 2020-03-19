@@ -4,7 +4,7 @@
  * Ork CSV
  *
  * @package   OrkTest\Csv
- * @copyright 2015-2019 Alex Howansky (https://github.com/AlexHowansky)
+ * @copyright 2015-2020 Alex Howansky (https://github.com/AlexHowansky)
  * @license   https://github.com/AlexHowansky/ork-csv/blob/master/LICENSE MIT License
  * @link      https://github.com/AlexHowansky/ork-csv
  */
@@ -37,7 +37,8 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     {
         $file = $this->vfs->url() . '/' . $name . '.csv';
         $content = [
-            'callbacks' => "Id,Name\n1,Foo\n2, Bar\n3, BAZ \n",
+            'callbacksWithHeader' => "Id,Name\n1,Foo\n2, Bar\n3, BAZ \n",
+            'callbacksWithoutHeader' => "1000,Foo\n2000, Bar\n3000, BAZ \n",
             'header' => "Id , Name, Number\n1,Foo,37\n2,Bar,142\n3,Baz,71\n",
             'headerless' => "1,2,3,4,5\n6,7,8,9,10\n",
             'mismatch' => "Id,Name,Number\n1,Foo,37\n2,Bar\n3,Baz,71\n",
@@ -99,7 +100,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('callbacks'),
+            'file' => $this->getFile('callbacksWithHeader'),
             'callbacks' => [
                 'DoesNotExist' => ['strtolower'],
             ],
@@ -115,7 +116,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     public function testCallbackRegex()
     {
         $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('callbacks'),
+            'file' => $this->getFile('callbacksWithHeader'),
             'callbacks' => [
                 '/./' => ['strtolower', 'trim'],
             ],
@@ -131,14 +132,14 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test that callbacks work.
+     * Test that callbacks with a header row work.
      *
      * @return void
      */
-    public function testCallbacks()
+    public function testCallbacksWithHeader()
     {
         $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('callbacks'),
+            'file' => $this->getFile('callbacksWithHeader'),
             'callbacks' => [
                 'Name' => ['strtolower', 'trim', [$this, 'reverse']],
             ],
@@ -150,6 +151,31 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
                 '3' => ['Id' => 3, 'Name' => 'zab'],
             ],
             $csv->toArray('Id')
+        );
+    }
+
+    /**
+     * Test that callbacks without a header row work.
+     *
+     * @return void
+     */
+    public function testCallbacksWithoutHeader()
+    {
+        $csv = new \Ork\Csv\Reader([
+            'file' => $this->getFile('callbacksWithoutHeader'),
+            'header' => false,
+            'callbacks' => [
+                0 => 'number_format',
+                1 => ['strtolower', 'trim', [$this, 'reverse']],
+            ],
+        ]);
+        $this->assertEquals(
+            [
+                ['1,000', 'oof'],
+                ['2,000', 'rab'],
+                ['3,000', 'zab'],
+            ],
+            $csv->toArray()
         );
     }
 
