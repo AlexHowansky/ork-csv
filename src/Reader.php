@@ -194,11 +194,10 @@ class Reader extends CsvAbstract implements \IteratorAggregate
         if (empty($this->getConfig('columns')) === true) {
             return $fields;
         }
-        $result = array_combine($this->getConfig('columns'), $fields);
-        if ($result === false) {
+        if (count($this->getConfig('columns')) !== count($fields)) {
             throw new \RuntimeException('Column mismatch on line: ' . $this->line);
         }
-        return $result;
+        return (array) array_combine($this->getConfig('columns'), $fields);
     }
 
     /**

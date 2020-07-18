@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.1
+
+* Prevent E_WARNING on reader column mismatch.
+
 ## 1.2.0
 
 * Added callbacks feature to Writer.

@@ -384,17 +384,24 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test that we detect a column mismatch.
+     * Test that we detect a column mismatch without also getting an E_WARNING.
      *
      * @return void
      */
     public function testMismatchFile()
     {
+        set_error_handler(
+            function () {
+                $this->assertTrue(false);
+            },
+            E_WARNING
+        );
         $this->expectException(\RuntimeException::class);
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('mismatch'),
         ]);
         $csv->toArray();
+        restore_error_handler();
     }
 
     /**
