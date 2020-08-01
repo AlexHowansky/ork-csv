@@ -19,8 +19,8 @@
     "require-dev": {
         "mikey179/vfsstream": "^1.6.8",
         "ork/phpcs": "^2.1.0",
-        "phpstan/phpstan": "^0.11.19",
-        "phpunit/phpunit": "^8.5.8"
+        "phpstan/phpstan": ">=0.12.0 <1.0.0",
+        "phpunit/phpunit": "^9.2.6"
     },
     "autoload": {
         "psr-4": {
@@ -36,6 +36,6 @@
         "markdown": "markdownlint *.md docs",
         "phpcs": "phpcs",
         "phpstan": "phpstan analyze",
-        "test": "phpunit --testdox --colors=always --verbose"
+        "test": "phpunit"
     }
 }
