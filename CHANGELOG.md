@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.3.0
+
+* Removed support for PHP 7.2.
+
 ## 1.2.1
 
 * Prevent E_WARNING on reader column mismatch.

@@ -13,14 +13,15 @@
         }
     ],
     "require": {
-        "php": "^7.2",
-        "ork/core": "^1.0.2"
+        "php": "^7.3",
+        "ork/core": "^1.1.0"
     },
     "require-dev": {
         "mikey179/vfsstream": "^1.6.8",
         "ork/phpcs": "^2.1.0",
-        "phpstan/phpstan": ">=0.12.0 <1.0.0",
-        "phpunit/phpunit": "^9.2.6"
+        "phpstan/phpstan": ">=0.12.42 <1.0.0",
+        "phpunit/phpunit": "^9.3.10",
+        "roave/security-advisories": "dev-master"
     },
     "autoload": {
         "psr-4": {
