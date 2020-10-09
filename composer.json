@@ -19,8 +19,8 @@
     "require-dev": {
         "mikey179/vfsstream": "^1.6.8",
         "ork/phpcs": "^2.1.0",
-        "phpstan/phpstan": ">=0.12.42 <1.0.0",
-        "phpunit/phpunit": "^9.3.10",
+        "phpstan/phpstan": ">=0.12.48 <1.0.0",
+        "phpunit/phpunit": "^9.4.0",
         "roave/security-advisories": "dev-master"
     },
     "autoload": {
