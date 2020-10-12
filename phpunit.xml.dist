@@ -2,21 +2,23 @@
 
 <phpunit bootstrap="vendor/autoload.php" colors="true" testdox="true" verbose="true">
 
-    <testsuite name="Ork CSV">
-        <directory>./tests/</directory>
-    </testsuite>
-
-    <filter>
-        <whitelist>
-            <directory>./src/</directory>
-            <exclude>
-                <directory>./tests/</directory>
-            </exclude>
-        </whitelist>
-    </filter>
+    <testsuites>
+        <testsuite name="Ork CSV">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
 
     <logging>
-        <log type="coverage-html" target="./coverage" />
+        <junit outputFile=".junit.xml" />
     </logging>
+
+    <coverage>
+        <include>
+            <directory>src</directory>
+        </include>
+        <report>
+            <html outputDirectory=".coverage" />
+        </report>
+    </coverage>
 
 </phpunit>

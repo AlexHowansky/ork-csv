@@ -1,6 +1,7 @@
-/coverage/
-/vendor/
+.coverage/
+.junit.xml
 .phpunit.result.cache
 phpcs.xml
 phpstan.neon
 phpunit.xml
+vendor/
