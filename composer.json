@@ -19,8 +19,9 @@
     "require-dev": {
         "mikey179/vfsstream": "^1.6.8",
         "ork/phpcs": "^2.1.0",
-        "phpstan/phpstan": ">=0.12.48 <1.0.0",
-        "phpunit/phpunit": "^9.4.0",
+        "phpmetrics/phpmetrics": "^2.7.4",
+        "phpstan/phpstan": ">=0.12.50 <1.0.0",
+        "phpunit/phpunit": "^9.4.1",
         "roave/security-advisories": "dev-master"
     },
     "autoload": {
@@ -35,6 +36,7 @@
     },
     "scripts": {
         "markdown": "markdownlint *.md docs",
+        "metrics": "phpmetrics --config=phpmetrics.json",
         "phpcs": "phpcs",
         "phpstan": "phpstan analyze",
         "test": "phpunit"

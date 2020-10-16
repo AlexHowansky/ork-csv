@@ -1,5 +1,6 @@
 .coverage/
 .junit.xml
+.metrics/
 .phpunit.result.cache
 phpcs.xml
 phpstan.neon
