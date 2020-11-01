@@ -191,7 +191,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
             'file' => $this->getFile('headerless'),
             'header' => false,
         ]);
-        iterator_to_array($csv->getColumn(100));
+        $null = iterator_to_array($csv->getColumn(100));
     }
 
     /**
@@ -205,7 +205,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
         $csv = new \Ork\Csv\Reader([
             'file' => $this->getFile('header'),
         ]);
-        iterator_to_array($csv->getColumn('Foo'));
+        $null = iterator_to_array($csv->getColumn('Foo'));
     }
 
     /**
