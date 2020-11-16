@@ -18,7 +18,7 @@ class Writer extends CsvAbstract
 {
 
     /**
-     * Contains the column names from the header row.
+     * Contains the expected column names.
      *
      * @var array
      */
@@ -31,25 +31,10 @@ class Writer extends CsvAbstract
      */
     protected $config = [
 
-        /**
-         * Callback functions to be run on the values before they're output. If using a header row, the array index
-         * should be the name of the field to apply callbacks to. Alternatively, if the index string begins with a
-         * slash, it will be treated as a regex and applied to all matching fields. If not using a header row, the
-         * array index should be the numerical index of the column to apply the callback(s) to. The value for each
-         * entry can be a single callable or an array of callables. Each callable should expect one parameter and
-         * return one value. For example:
-         *
-         * [
-         *     '/./' => 'trim',
-         *     'name' => 'strtolower',
-         *     'email' => ['strtolower', 'trim'],
-         *     'phone' => [[$someObject, 'methodName']],
-         * ]
-         */
+        // Callback functions to be run on the values before they're output.
         'callbacks' => [],
 
-        // The column names for the header row. If not provided, we'll use the keys from the first array passed to the
-        // write() method.
+        // Explicit list of columns if auto-detection is not desired.
         'columns' => null,
 
         // The field delimiter character.
@@ -58,7 +43,7 @@ class Writer extends CsvAbstract
         // The escape character.
         'escape' => '\\',
 
-        // The file to process.
+        // The file to write to.
         'file' => 'php://stdout',
 
         // Write a header row with column names?
@@ -66,6 +51,9 @@ class Writer extends CsvAbstract
 
         // The field quote charater.
         'quote' => '"',
+
+        // If true, abort when encountering columns not described in the header. If false, ignore them.
+        'strict' => true,
 
     ];
 
@@ -112,7 +100,6 @@ class Writer extends CsvAbstract
         }
 
         return $result;
-
     }
 
     /**
@@ -127,6 +114,8 @@ class Writer extends CsvAbstract
     public function write(array $row): int
     {
 
+        ++$this->line;
+
         // Open the file if it's not already open.
         if ($this->csv === null) {
             $csv = fopen($this->getConfig('file'), 'w');
@@ -136,16 +125,25 @@ class Writer extends CsvAbstract
             $this->csv = $csv;
         }
 
-        // If we're not using a header row, just output the values. The caller will have to ensure the proper column
-        // order.
-        if ($this->getConfig('header') === false) {
-            return $this->put(array_values($this->applyCallbacks($row)));
-        }
-
         // Output the header row if we haven't already.
         if ($this->columns === null) {
-            $this->columns = $this->getConfig('columns') === null ? array_keys($row) : $this->getConfig('columns');
-            $this->put($this->columns);
+            $this->columns = array_flip(
+                $this->getConfig('columns') === null
+                    ? array_keys($row)
+                    : $this->getConfig('columns')
+            );
+            if ($this->getConfig('header') === true) {
+                $this->put(array_keys($this->columns));
+            }
+        }
+
+        // In strict mode, abort when we get columns we don't know about.
+        if ($this->getConfig('strict') === true) {
+            foreach (array_keys($row) as $column) {
+                if (array_key_exists($column, $this->columns) === false) {
+                    throw new \RuntimeException('Unknown column "' . $column . '" on line ' . $this->line);
+                }
+            }
         }
 
         $row = $this->applyCallbacks($row);
@@ -154,11 +152,26 @@ class Writer extends CsvAbstract
         // the missing fields, so that the CSV columns line up properly. Also, make sure that the columns are in the
         // order that was specified in the header row.
         $ordered = [];
-        foreach ($this->columns as $column) {
+        foreach (array_keys($this->columns) as $column) {
             $ordered[] = array_key_exists($column, $row) === true ? $row[$column] : '';
         }
         return $this->put($ordered);
 
+    }
+
+    /**
+     * Write multiple rows from an array or itertor.
+     *
+     * @param iterable $rows The iterator to iterate over.
+     *
+     * @return int The number of rows written.
+     */
+    public function writeFromIterator(iterable $rows): int
+    {
+        foreach ($rows as $row) {
+            $this->write($row);
+        }
+        return $this->line;
     }
 
 }

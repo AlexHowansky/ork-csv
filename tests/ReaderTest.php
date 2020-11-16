@@ -12,6 +12,7 @@
 namespace OrkTest\Csv;
 
 use org\bovigo\vfs\vfsStream;
+use Ork\Csv\Reader;
 
 /**
  * Test the Reader class.
@@ -27,30 +28,16 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     protected $vfs;
 
     /**
-     * Get a virtual file.
+     * Make a temporary file for reading.
      *
-     * @param string $name The name of the file to get.
+     * @param string $content The content to save in the file.
      *
-     * @return string
+     * @return string The file name.
      */
-    protected function getFile(string $name): string
+    protected function makeFile(string $content = null): string
     {
-        $file = $this->vfs->url() . '/' . $name . '.csv';
-        $content = [
-            'callbacksWithHeader' => "Id,Name\n1,Foo\n2, Bar\n3, BAZ \n",
-            'callbacksWithoutHeader' => "1000,Foo\n2000, Bar\n3000, BAZ \n",
-            'header' => "Id , Name, Number\n1,Foo,37\n2,Bar,142\n3,Baz,71\n",
-            'headerless' => "1,2,3,4,5\n6,7,8,9,10\n",
-            'mismatch' => "Id,Name,Number\n1,Foo,37\n2,Bar\n3,Baz,71\n",
-            'notUniqueHeader' => "Id,Id,Number\n1,Foo,37\n2,Bar,142\n3,Baz,71\n",
-            'perms' => "a,b,c,d,e\n",
-        ];
-        if (array_key_exists($name, $content) === true) {
-            file_put_contents($file, $content[$name]);
-            if ($name === 'perms') {
-                chmod($file, 0000);
-            }
-        }
+        $file = $this->vfs->url() . '/' . debug_backtrace()[1]['function'];
+        file_put_contents($file, $content);
         return $file;
     }
 
@@ -73,7 +60,6 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function setUp(): void
     {
-        error_reporting(E_ALL & ~E_WARNING);
         $this->vfs = vfsStream::setup();
     }
 
@@ -82,30 +68,42 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testBadPerms()
+    public function testBadPerms(): void
     {
         $this->expectException(\RuntimeException::class);
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('perms'),
-        ]);
-        $csv->toArray();
+        $file = $this->makeFile();
+        chmod($file, 0000);
+        $csv = new Reader(['file' => $file]);
+        // @phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+        @$csv->toArray();
     }
 
     /**
-     * Test that we detect a callback on a missing column
+     * Test that we can specify callbacks for columns that might not exist.
      *
      * @return void
      */
-    public function testCallbackOnMissingColumn()
+    public function testCallbacksOnMissingColumn(): void
     {
-        $this->expectException(\RuntimeException::class);
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('callbacksWithHeader'),
-            'callbacks' => [
-                'DoesNotExist' => ['strtolower'],
-            ],
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name
+                1,Foo
+                2,Bar
+                3,Baz
+                EOS
+            ),
+            'callbacks' => ['DoesNotExist' => 'strtolower'],
         ]);
-        $csv->toArray('Id');
+        $this->assertEquals(
+            [
+                ['Id' => 1, 'Name' => 'Foo'],
+                ['Id' => 2, 'Name' => 'Bar'],
+                ['Id' => 3, 'Name' => 'Baz'],
+            ],
+            $csv->toArray()
+        );
     }
 
     /**
@@ -113,21 +111,59 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testCallbackRegex()
+    public function testCallbacksRegex(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('callbacksWithHeader'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id," Name"
+                1," Foo "
+                2,"Bar "
+                3,Baz
+                EOS
+            ),
             'callbacks' => [
                 '/./' => ['strtolower', 'trim'],
             ],
         ]);
         $this->assertEquals(
             [
-                '1' => ['Id' => 1, 'Name' => 'foo'],
-                '2' => ['Id' => 2, 'Name' => 'bar'],
-                '3' => ['Id' => 3, 'Name' => 'baz'],
+                ['Id' => 1, 'Name' => 'foo'],
+                ['Id' => 2, 'Name' => 'bar'],
+                ['Id' => 3, 'Name' => 'baz'],
             ],
-            $csv->toArray('Id')
+            $csv->toArray()
+        );
+    }
+
+    /**
+     * Test that multiple regex callbacks on the same field work.
+     *
+     * @return void
+     */
+    public function testCallbacksRegexMultiple(): void
+    {
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name
+                1," Foo "
+                2,"Bar "
+                3,BAZ
+                EOS
+            ),
+            'callbacks' => [
+                '/./' => 'strtolower',
+                '/e/' => 'trim',
+            ],
+        ]);
+        $this->assertEquals(
+            [
+                ['Id' => 1, 'Name' => 'foo'],
+                ['Id' => 2, 'Name' => 'bar'],
+                ['Id' => 3, 'Name' => 'baz'],
+            ],
+            $csv->toArray()
         );
     }
 
@@ -136,21 +172,28 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testCallbacksWithHeader()
+    public function testCallbacksWithHeader(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('callbacksWithHeader'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name
+                1," Foo "
+                2,"Bar "
+                3,BAZ
+                EOS
+            ),
             'callbacks' => [
                 'Name' => ['strtolower', 'trim', [$this, 'reverse']],
             ],
         ]);
         $this->assertEquals(
             [
-                '1' => ['Id' => 1, 'Name' => 'oof'],
-                '2' => ['Id' => 2, 'Name' => 'rab'],
-                '3' => ['Id' => 3, 'Name' => 'zab'],
+                ['Id' => 1, 'Name' => 'oof'],
+                ['Id' => 2, 'Name' => 'rab'],
+                ['Id' => 3, 'Name' => 'zab'],
             ],
-            $csv->toArray('Id')
+            $csv->toArray()
         );
     }
 
@@ -159,10 +202,16 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testCallbacksWithoutHeader()
+    public function testCallbacksWithoutHeader(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('callbacksWithoutHeader'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                1000," Foo "
+                2000,"Bar "
+                3000,BAZ
+                EOS
+            ),
             'header' => false,
             'callbacks' => [
                 0 => 'number_format',
@@ -184,11 +233,16 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testGetBadColumnViaInt()
+    public function testGetBadColumnViaInt(): void
     {
         $this->expectException(\RuntimeException::class);
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('headerless'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                1,2,3
+                4,5,6
+                EOS
+            ),
             'header' => false,
         ]);
         $null = iterator_to_array($csv->getColumn(100));
@@ -199,13 +253,20 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testGetBadColumnViaString()
+    public function testGetBadColumnViaString(): void
     {
         $this->expectException(\RuntimeException::class);
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('header'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name
+                1,Foo
+                2,Bar
+                3,Baz
+                EOS
+            ),
         ]);
-        $null = iterator_to_array($csv->getColumn('Foo'));
+        $null = iterator_to_array($csv->getColumn('BadColumn'));
     }
 
     /**
@@ -213,10 +274,17 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testGetColumns()
+    public function testGetColumns(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('header'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name,Number
+                1,Foo,4
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
         ]);
         $this->assertEquals(['Id', 'Name', 'Number'], $csv->getColumns());
     }
@@ -226,10 +294,16 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testGetColumnsHeaderless()
+    public function testGetColumnsHeaderless(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('headerless'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                1,Foo,4
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
             'header' => false,
         ]);
         $this->assertEmpty($csv->getColumns());
@@ -240,14 +314,20 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testGetColumnViaInt()
+    public function testGetColumnViaInt(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('headerless'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                1,Foo,4
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
             'header' => false,
         ]);
-        $this->assertEquals([1, 6], iterator_to_array($csv->getColumn(0)));
-        $this->assertEquals([5, 10], iterator_to_array($csv->getColumn(4)));
+        $this->assertEquals([1, 2, 3], iterator_to_array($csv->getColumn(0)));
+        $this->assertEquals([4, 5, 6], iterator_to_array($csv->getColumn(2)));
     }
 
     /**
@@ -255,13 +335,20 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testGetColumnViaString()
+    public function testGetColumnViaString(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('header'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name,Number
+                1,Foo,4
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
         ]);
         $this->assertEquals([1, 2, 3], iterator_to_array($csv->getColumn('Id')));
-        $this->assertSame(['Foo', 'Bar', 'Baz'], iterator_to_array($csv->getColumn('Name')));
+        $this->assertEquals(['Foo', 'Bar', 'Baz'], iterator_to_array($csv->getColumn('Name')));
     }
 
     /**
@@ -269,14 +356,22 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testHeaderColumnOverride()
+    public function testHeaderColumnOverride(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('header'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name,Number
+                1,Foo,4
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
             'columns' => ['one', 'two', 'three'],
         ]);
+        $this->assertEquals(['one', 'two', 'three'], $csv->getColumns());
         $this->assertEquals([1, 2, 3], iterator_to_array($csv->getColumn('one')));
-        $this->assertSame(['Foo', 'Bar', 'Baz'], iterator_to_array($csv->getColumn('two')));
+        $this->assertEquals(['Foo', 'Bar', 'Baz'], iterator_to_array($csv->getColumn('two')));
     }
 
     /**
@@ -284,30 +379,42 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testHeaderFile()
+    public function testHeaderFile(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('header'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name,Number
+                1,Foo,4
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
         ]);
         $this->assertEquals(
             [
-                '1' => ['Id' => 1, 'Name' => 'Foo', 'Number' => 37],
-                '2' => ['Id' => 2, 'Name' => 'Bar', 'Number' => 142],
-                '3' => ['Id' => 3, 'Name' => 'Baz', 'Number' => 71],
+                ['Id' => 1, 'Name' => 'Foo', 'Number' => 4],
+                ['Id' => 2, 'Name' => 'Bar', 'Number' => 5],
+                ['Id' => 3, 'Name' => 'Baz', 'Number' => 6],
             ],
-            $csv->toArray('Id')
+            $csv->toArray()
         );
     }
 
     /**
-     * Test that we can specify the colunms of a file without headers.
+     * Test that we can specify the columns of a file without headers.
      *
      * @return void
      */
-    public function testHeaderlessColumnExplicit()
+    public function testHeaderlessColumnExplicit(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('headerless'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                1,2,3,4,5
+                6,7,8,9,10
+                EOS
+            ),
             'header' => false,
             'columns' => ['one', 'two', 'three', 'four', 'five'],
         ]);
@@ -320,10 +427,15 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testHeaderlessFile()
+    public function testHeaderlessFile(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('headerless'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                1,2,3,4,5
+                6,7,8,9,10
+                EOS
+            ),
             'header' => false,
         ]);
         $this->assertEquals([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]], $csv->toArray());
@@ -334,10 +446,17 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testLineCountHeader()
+    public function testLineCountHeader(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('header'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name,Number
+                1,Foo,4
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
         ]);
         foreach ($csv as $index => $row) {
             $this->assertSame($index + 2, $csv->getLineNumber());
@@ -355,19 +474,27 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testLineCountHeaderless()
+    public function testLineCountHeaderless(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('headerless'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                1,Foo,4
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
             'header' => false,
         ]);
         foreach ($csv as $index => $row) {
             $this->assertSame($index + 1, $csv->getLineNumber());
         }
+        $this->assertSame(3, $csv->getLineNumber());
         // Make sure count gets reset for subsequent calls w/ same object.
         foreach ($csv as $index => $row) {
             $this->assertSame($index + 1, $csv->getLineNumber());
         }
+        $this->assertSame(3, $csv->getLineNumber());
     }
 
     /**
@@ -375,33 +502,40 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testLineNumberZeroBeforeStart()
+    public function testLineNumberZeroBeforeStart(): void
     {
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('header'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name,Number
+                1,Foo,4
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
         ]);
         $this->assertSame(0, $csv->getLineNumber());
     }
 
     /**
-     * Test that we detect a column mismatch without also getting an E_WARNING.
+     * Test that we detect a column mismatch.
      *
      * @return void
      */
-    public function testMismatchFile()
+    public function testMismatchFile(): void
     {
-        set_error_handler(
-            function () {
-                $this->assertTrue(false);
-            },
-            E_WARNING
-        );
         $this->expectException(\RuntimeException::class);
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('mismatch'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name,Number
+                1,Foo,4,extra
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
         ]);
         $csv->toArray();
-        restore_error_handler();
     }
 
     /**
@@ -409,13 +543,14 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testMissingFile()
+    public function testMissingFile(): void
     {
         $this->expectException(\RuntimeException::class);
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('noneSuch'),
+        $csv = new Reader([
+            'file' => $this->vfs->url() . '/fileThatDoesNotExist',
         ]);
-        $csv->toArray();
+        // @phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+        @$csv->toArray();
     }
 
     /**
@@ -423,11 +558,16 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testNonUniqueColumn()
+    public function testNonUniqueColumn(): void
     {
         $this->expectException(\RuntimeException::class);
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('headerless'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                1,2,3,4,5
+                6,7,8,9,10
+                EOS
+            ),
             'header' => false,
             'columns' => ['one', 'one', 'two', 'three', 'four'],
         ]);
@@ -439,11 +579,18 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testNotUniqueHeaderFile()
+    public function testNotUniqueHeaderFile(): void
     {
         $this->expectException(\RuntimeException::class);
-        $csv = new \Ork\Csv\Reader([
-            'file' => $this->getFile('notUniqueHeader'),
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name,Id
+                1,Foo,4
+                2,Bar,5
+                3,Baz,6
+                EOS
+            ),
         ]);
         $csv->toArray();
     }
@@ -451,7 +598,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
     /**
      * Test that we can read via STDIN.
      *
-     * This is kinda wonky. It looks like "composer script" sets STDIN to non-blocking, which is required for this
+     * This is kinda wonky. It looks like `composer <script>` sets STDIN to non-blocking, which is required for this
      * test to pass. However, TravisCI doesn't invoke the tests via the composer wrapper, so this just hangs waiting
      * for input. To avoid that, we'll explicitly set STDIN to non-blocking here.
      *
@@ -459,7 +606,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @throws \RuntimeException On error.
      */
-    public function testStdin()
+    public function testStdin(): void
     {
         $fh = fopen('php://stdin', 'r');
         if ($fh === false) {
@@ -467,8 +614,43 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
         }
         stream_set_blocking($fh, false);
         fclose($fh);
-        $csv = new \Ork\Csv\Reader(['file' => 'php://stdin']);
+        $csv = new Reader(['file' => 'php://stdin']);
         $this->assertEmpty($csv->toArray());
+    }
+
+    /**
+     * Test that reading to an associative array works.
+     *
+     * @return void
+     */
+    public function testToArrayAssociative(): void
+    {
+        $csv = new Reader([
+            'file' => $this->makeFile(
+                <<<'EOS'
+                Id,Name
+                1,Foo
+                2,Bar
+                3,Baz
+                EOS
+            ),
+        ]);
+        $this->assertEquals(
+            [
+                1 => ['Id' => 1, 'Name' => 'Foo'],
+                2 => ['Id' => 2, 'Name' => 'Bar'],
+                3 => ['Id' => 3, 'Name' => 'Baz'],
+            ],
+            $csv->toArray('Id')
+        );
+        $this->assertEquals(
+            [
+                'Foo' => ['Id' => 1, 'Name' => 'Foo'],
+                'Bar' => ['Id' => 2, 'Name' => 'Bar'],
+                'Baz' => ['Id' => 3, 'Name' => 'Baz'],
+            ],
+            $csv->toArray('Name')
+        );
     }
 
 }

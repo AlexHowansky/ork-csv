@@ -20,6 +20,13 @@ abstract class CsvAbstract
     use \Ork\Core\ConfigurableTrait;
 
     /**
+     * Contains the line count.
+     *
+     * @var int
+     */
+    protected $line = 0;
+
+    /**
      * Apply callbacks.
      *
      * @param array $row The row to process.
@@ -45,15 +52,24 @@ abstract class CsvAbstract
             }
 
             // Apply to one explicitly named column.
-            if (array_key_exists($column, $row) === false) {
-                throw new \RuntimeException('Unable to apply callback to missing column: ' . $column);
-            }
-            foreach ((array) $callbacks as $callback) {
-                $row[$column] = call_user_func($callback, $row[$column]);
+            if (array_key_exists($column, $row) === true) {
+                foreach ((array) $callbacks as $callback) {
+                    $row[$column] = call_user_func($callback, $row[$column]);
+                }
             }
 
         }
         return $row;
+    }
+
+    /**
+     * Get the current line number.
+     *
+     * @return int The current line number.
+     */
+    public function getLineNumber(): int
+    {
+        return $this->line;
     }
 
 }

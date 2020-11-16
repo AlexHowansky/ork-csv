@@ -2,37 +2,56 @@
 
 `\Ork\Csv\Reader` is a CSV reader.
 
-## Configuration
+## Usage
 
-`\Ork\Csv\Reader` uses [`\Ork\Core\ConfigurableTrait`](https://github.com/AlexHowansky/ork-core/wiki/ConfigurableTrait).
-Its configuration attributes are as follows:
+`\Ork\Csv\Reader` is implemented as an iterator.
 
-|Name|Type|Description|
-|----|----|-----------|
-|callbacks|array|Defines callback functions to be run on the values after they're read. If using column names, the array index should be the name of the column to apply callbacks to. Alternatively, if the index string begins with a slash, it will be treated as a regex and applied to all matching columns. If not using column names, the array index should be the numerical index (0-based) of the column to apply the callback(s) to. The value for each entry can be a single callable or an array of callables. Each callable should expect one parameter and return one value.|
-|columns|array|The names to assign to columns. If `header` is true and this is empty (the default), the values from the header row are used as column names. If `header` is true and this is not empty, these values are used instead.|
-|delimiter|string|The field delimiter character. Defaults to comma: `,`|
-|escape|string|The escape character. Defaults to blackslash: `\`|
-|file|string|The file to process. Defaults to: `php://stdin`|
-|header|bool|Whether the first row contains column names. Defaults to: `true`|
-|quote|string|The quote character. Defaults to double quote: `"`|
+### With Header Row
 
-## Iterator Usage
+If the file has a header row, each iteration of the object will yield an
+associative array where the keys are taken from the header row.
 
-`\Ork\Csv\Reader` is implemented as an iterator, so usage is quite simple.
+```csv
+id,name,description
+1,foo,Something to foo with.
+2,bar,Something to bar with.
+```
+
+```php
+$csv = new \Ork\Csv\Reader([
+    'file' => '/path/to/file',
+]);
+foreach ($csv as $row) {
+    print_r($row);
+}
+```
+
+Output:
+
+```text
+Array
+(
+    [id] => 1
+    [name] => foo
+    [description] => Something to foo with.
+)
+Array
+(
+    [id] => 2
+    [name] => bar
+    [description] => Something to bar with.
+)
+```
 
 ### Without Header Row
 
-If the file has no headers, each iteration of the object will yield a
-zero-indexed array containing the values from the row. For example, consider
-a CSV file containing:
+If the file does not have a header row, each iteration of the object will
+yield a zero-indexed array containing the values from the row.
 
 ```csv
 one,two,three
 four,five,six
 ```
-
-The following code:
 
 ```php
 $csv = new \Ork\Csv\Reader([
@@ -44,68 +63,77 @@ foreach ($csv as $row) {
 }
 ```
 
-Will output:
+Output:
 
-    Array
-    (
-        [0] => one
-        [1] => two
-        [2] => three
-    )
-    Array
-    (
-        [0] => four
-        [1] => five
-        [2] => six
-    )
-
-### With Header Row
-
-If the file has headers, each iteration of the object will yield an associative
-array where the keys are taken from the header row. Consider a CSV file
-containing:
-
-```csv
-id|name|description
-1|foo|Something to foo with.
-2|bar|Something to bar with.
+```text
+Array
+(
+    [0] => one
+    [1] => two
+    [2] => three
+)
+Array
+(
+    [0] => four
+    [1] => five
+    [2] => six
+)
 ```
 
-The following code:
+## Configuration
+
+`\Ork\Csv\Writer` uses [`\Ork\Core\ConfigurableTrait`][1]. Its configuration
+parameters are as follows:
+
+### `file` *string*
+
+The file to write to. Defaults to: `php://stdin`
+
+### `header` *bool*
+
+Set to `true` if the file has a header row. Defaults to: `true`
+
+### `columns` *array*
+
+The names to assign to columns. If `header` is true and this is empty (the
+default), the values from the header row are used as column names. If
+`header` is true and this is not empty, these values are used instead.
+
+### `callbacks` *array\<string|int, callable\>*
+
+Defines optional callback functions to be run on values after they're read.
+
+### `delimiter` *string*
+
+The field delimiter character. Defaults to comma: `,`
 
 ```php
-$csv = new \Ork\Csv\Reader([
-    'file' => '/path/to/file',
-    'delimiter' => '|',
+$tsv = new \Ork\Csv\Reader([
+    'delimiter' => "\t",
 ]);
-foreach ($csv as $row) {
-    print_r($row);
-}
 ```
 
-Will output:
+```php
+$psv = new \Ork\Csv\Reader([
+    'delimiter' => '|',
+]);
+```
 
-    Array
-    (
-        [id] => 1
-        [name] => foo
-        [description] => Something to foo with.
-    )
-    Array
-    (
-        [id] => 2
-        [name] => bar
-        [description] => Something to bar with.
-    )
+### `escape` *string*
+
+The escape character. Defaults to blackslash: `\`
+
+### `quote` *string*
+
+The quote character. Defaults to double quote: `"`
 
 ## Fetching a Single Column
 
-You may also iterate over the values for just one column. If the file does not
-have a header row, the column parameter should be the zero-indexed column
-number. (This is zero-indexed to ensure that values referenced in this manner
-match those referenced by the array index in the full-row technique.) If the
-file does have a header row, the column parameter should be the name of the
-column.
+You may iterate over the values for just one column. If the file does not have
+a header row, the column parameter should be the zero-indexed column number.
+(This is zero-indexed to ensure that values referenced in this manner match
+those referenced by the array index in the full-row technique.) If the file
+does have a header row, the column parameter should be the name of the column.
 
 ```php
 $csv = new \Ork\Csv\Reader([
@@ -123,8 +151,7 @@ $csv = new \Ork\Csv\Reader([
     'header' => true,
 ]);
 foreach ($csv->getColumn('name') as $value) {
-    // $value contains the value from the column
-    // identified by the "name" header row.
+    // $value contains the value from the "name" column.
 }
 ```
 
@@ -139,43 +166,40 @@ iteration of a file with a header row will yield a line number of 2.
 The entire file may be cast to an array via the `toArray()` method. A file
 without a header row will be cast to an indexed array of indexed arrays. A file
 with a header row will be cast to an indexed array of associative arrays. Note
-that this loads the entire file into memory in one big hunk.
+that this effectively loads the entire file into memory at once.
 
 ## Callbacks
 
 Callback filters may be defined to post-process fields. After reading each row,
-the list of callbacks will be processed in the order defined. Consider a CSV
-file containing:
+the list of callbacks will be processed in the order defined.
 
 ```csv
-id|name|description
-1|foo|Something to foo with.
-2|bar|Something to bar with.
+id,name,description
+1,foo,Something to foo with.
+2,bar,Something to bar with.
 ```
-
-The following code:
 
 ```php
 $csv = new \Ork\Csv\Reader([
     'callbacks' => [
         'name' => 'strtoupper',
     ],
-    'delimiter' => '|',
-    'header' => true,
 ]);
 foreach ($csv as $row) {
     echo $row['name'] . "\n";
 }
 ```
 
-Will output:
+Output:
 
-    FOO
-    BAR
+```text
+FOO
+BAR
+```
 
-Callbacks are specified in the standard PHP fashion -- as the string name of a
-function, or an array of object and method name. Multiple callbacks may be
-specified as an array.
+Callbacks are specified in the standard PHP fashion -- as a closure, the
+name of a function, or an array of object and method name. Multiple callbacks
+may be specified as an array.
 
 ```php
 $csv = new \Ork\Csv\Reader([
@@ -183,6 +207,7 @@ $csv = new \Ork\Csv\Reader([
         'field1' => 'strtolower',
         'field2' => 'Obj::method',
         'field3' => ['strtolower', 'Obj::method', [new Obj(), 'method']],
+        'field4' => function ($value) { ... },
     ],
 ]);
 ```
@@ -199,8 +224,8 @@ $csv = new \Ork\Csv\Reader([
 ]);
 ```
 
-If the callback key starts with a slash `/` then it will be interpreted as a
-regex and applied to all columns that match.
+If the callback column name starts with a slash `/` then it will be
+interpreted as a regex and applied to all columns that match.
 
 ```php
 $csv = new \Ork\Csv\Reader([
@@ -210,3 +235,5 @@ $csv = new \Ork\Csv\Reader([
     ],
 ]);
 ```
+
+[1]: https://github.com/AlexHowansky/ork-core/wiki/ConfigurableTrait

@@ -12,6 +12,7 @@
 namespace OrkTest\Csv;
 
 use org\bovigo\vfs\vfsStream;
+use Ork\Csv\Writer;
 
 /**
  * Test the Writer class.
@@ -55,26 +56,33 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      */
     public function setUp(): void
     {
-        error_reporting(E_ALL);
         $this->vfs = vfsStream::setup();
     }
 
     /**
-     * Test that we detect a callback on a missing column
+     * Test that we can specify callbacks for columns that might not exist.
      *
      * @return void
      */
-    public function testCallbackOnMissingColumn()
+    public function testCallbacksOnMissingColumn(): void
     {
-        $this->expectException(\RuntimeException::class);
-        $csv = new \Ork\Csv\Writer([
+        $csv = new Writer([
             'file' => $this->getTempFile(),
-            'callbacks' => [
-                'Foo' => ['trim'],
-            ],
+            'callbacks' => ['Email' => ['strtolower', 'trim']],
         ]);
-        $csv->write(['Id' => 1, 'Name' => 'Foo']);
-        unset($csv);
+        $csv->writeFromIterator([
+            ['Id' => 1, 'Name' => 'Foo'],
+            ['Id' => 2, 'Name' => 'Bar'],
+        ]);
+        $this->assertSame(
+            <<<'EOS'
+            Id,Name
+            1,Foo
+            2,Bar
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
     }
 
     /**
@@ -82,50 +90,104 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testCallbackRegex()
+    public function testCallbacksRegex(): void
     {
-        $csv = new \Ork\Csv\Writer([
+        $csv = new Writer([
             'file' => $this->getTempFile(),
             'callbacks' => [
+                '/^I/' => function ($value) {
+                    return $value / 10;
+                },
                 '/e/' => ['strtolower', 'trim', [$this, 'reverse']],
             ],
         ]);
-        $csv->write(['Id' => 1000, 'Name' => ' FOO ']);
-        $csv->write(['Id' => 2000, 'Name' => ' Bar ']);
-        $csv->write(['Id' => 3000, 'Name' => 'baz']);
-        unset($csv);
-        $this->assertSame('ac2235527f6b65b87b4ba26f2af0480a', md5_file($this->getTempFile()));
+        $csv->writeFromIterator([
+            ['Id' => 10, 'Name' => ' FOO '],
+            ['Id' => 20, 'Name' => ' Bar '],
+            ['Id' => 30, 'Name' => 'baz'],
+        ]);
+        $this->assertEquals(
+            <<<'EOS'
+            Id,Name
+            1,oof
+            2,rab
+            3,zab
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
     }
 
     /**
-     * Test that callbacks work on files with headers.
+     * Test that multiple regex callbacks on the same field work.
      *
      * @return void
      */
-    public function testCallbacksWithHeader()
+    public function testCallbacksRegexMultiple(): void
     {
-        $csv = new \Ork\Csv\Writer([
+        $csv = new Writer([
+            'file' => $this->getTempFile(),
+            'callbacks' => [
+                '/./' => 'strtolower',
+                '/e/' => 'trim',
+            ],
+        ]);
+        $csv->writeFromIterator([
+            ['Id' => 1, 'Name' => ' FOO '],
+            ['Id' => 2, 'Name' => ' Bar '],
+            ['Id' => 3, 'Name' => 'baz'],
+        ]);
+        $this->assertEquals(
+            <<<'EOS'
+            Id,Name
+            1,foo
+            2,bar
+            3,baz
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
+    }
+
+    /**
+     * Test that callbacks work on associative array input.
+     *
+     * @return void
+     */
+    public function testCallbacksWithAssociative(): void
+    {
+        $csv = new Writer([
             'file' => $this->getTempFile(),
             'callbacks' => [
                 'Id' => 'number_format',
                 'Name' => ['strtolower', 'trim', [$this, 'reverse']],
             ],
         ]);
-        $csv->write(['Id' => 1000, 'Name' => ' FOO ']);
-        $csv->write(['Id' => 2000, 'Name' => ' Bar ']);
-        $csv->write(['Id' => 3000, 'Name' => 'baz']);
-        unset($csv);
-        $this->assertSame('58c1fd79167879b4b096cf6b9390bed4', md5_file($this->getTempFile()));
+        $csv->writeFromIterator([
+            ['Id' => 1000, 'Name' => ' FOO '],
+            ['Id' => 2000, 'Name' => ' Bar '],
+            ['Id' => 3000, 'Name' => 'baz'],
+        ]);
+        $this->assertSame(
+            <<<'EOS'
+            Id,Name
+            "1,000",oof
+            "2,000",rab
+            "3,000",zab
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
     }
 
     /**
-     * Test that callbacks work on files without headers.
+     * Test that callbacks work on files with indexed array input.
      *
      * @return void
      */
-    public function testCallbacksWithoutHeader()
+    public function testCallbacksWithIndexed(): void
     {
-        $csv = new \Ork\Csv\Writer([
+        $csv = new Writer([
             'file' => $this->getTempFile(),
             'header' => false,
             'callbacks' => [
@@ -133,11 +195,20 @@ class WriterTest extends \PHPUnit\Framework\TestCase
                 1 => ['strtolower', 'trim', [$this, 'reverse']],
             ],
         ]);
-        $csv->write([' FOO ', ' FOO ']);
-        $csv->write([' Bar ', ' Bar ']);
-        $csv->write(['baz', 'baz']);
-        unset($csv);
-        $this->assertSame('828b52089cff436139a64b135ef6ddc0', md5_file($this->getTempFile()));
+        $csv->writeFromIterator([
+            [' FOO ', ' FOO '],
+            [' Bar ', ' Bar '],
+            ['baz', 'baz'],
+        ]);
+        $this->assertSame(
+            <<<'EOS'
+            " foo ",oof
+            " bar ",rab
+            baz,zab
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
     }
 
     /**
@@ -145,44 +216,81 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testCreateFail()
+    public function testCreateWriteFail(): void
     {
         $this->expectException(\RuntimeException::class);
-        error_reporting(E_ALL & ~E_WARNING);
-        touch($this->getTempFile());
-        chmod($this->getTempFile(), 0000);
-        $csv = new \Ork\Csv\Writer([
-            'file' => $this->getTempFile(),
-            'header' => false,
-        ]);
-        $csv->write([1, 2, 3, 4, 5]);
+        $csv = new Writer(['file' => 'php://foo']);
+        // @phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+        @$csv->write([1, 2, 3, 4, 5]);
     }
 
     /**
-     * Test that we detect out of order columns.
+     * Test that we can explictly specify column names.
      *
      * @return void
      */
-    public function testOutOfOrderColumns()
+    public function testExplicitColumns(): void
     {
-        $csv = new \Ork\Csv\Writer([
+        $csv = new Writer([
             'file' => $this->getTempFile(),
-            'header' => true,
+            'columns' => ['Id', 'Name', 'Email'],
+            'strict' => false,
         ]);
-        $csv->write([
-            'Id' => 1,
-            'Name' => 'foo',
+        $csv->writeFromIterator([
+            ['Id' => 1, 'Name' => 'foo'],
+            ['Name' => 'baz', 'Email' => 'foo@bar.com'],
         ]);
-        $csv->write([
-            'Name' => 'bar',
-            'Id' => 2,
+        $this->assertSame(
+            <<<'EOS'
+            Id,Name,Email
+            1,foo,
+            ,baz,foo@bar.com
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
+    }
+
+    /**
+     * Test that we get a proper line count.
+     *
+     * @return void
+     */
+    public function testGetLineNumber(): void
+    {
+        $csv = new Writer(['file' => $this->getTempFile()]);
+        $this->assertSame(0, $csv->getLineNumber());
+        $csv->writeFromIterator([
+            ['Id' => 1, 'Name' => 'foo'],
+            ['Id' => 2, 'Name' => 'bar'],
+            ['Id' => 3, 'Name' => 'baz'],
         ]);
-        $csv->write([
-            'Id' => 3,
-            'Name' => 'baz',
+        $this->assertSame(3, $csv->getLineNumber());
+    }
+
+    /**
+     * Test that we correctly rearrange out-of-order columns.
+     *
+     * @return void
+     */
+    public function testOutOfOrderColumns(): void
+    {
+        $csv = new Writer(['file' => $this->getTempFile()]);
+        $csv->writeFromIterator([
+            ['Id' => 1, 'Name' => 'foo'],
+            ['Name' => 'bar', 'Id' => 2],
+            ['Id' => 3, 'Name' => 'baz'],
         ]);
-        unset($csv);
-        $this->assertSame('2fc774926f1155e3f70065241680043e', md5_file($this->getTempFile()));
+        $this->assertSame(
+            <<<'EOS'
+            Id,Name
+            1,foo
+            2,bar
+            3,baz
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
     }
 
     /**
@@ -190,9 +298,9 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testReturnValue()
+    public function testReturnValue(): void
     {
-        $csv = new \Ork\Csv\Writer([
+        $csv = new Writer([
             'file' => $this->getTempFile(),
             'header' => false,
         ]);
@@ -200,15 +308,95 @@ class WriterTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test that we can skip columns.
+     *
+     * @return void
+     */
+    public function testSkippedColumns(): void
+    {
+        $csv = new Writer(['file' => $this->getTempFile()]);
+        $csv->writeFromIterator([
+            ['one' => 1, 'two' => 2,'three' => 3],
+            ['two' => 2, 'three' => 3],
+            ['one' => 1, 'three' => 3],
+            ['one' => 1, 'two' => 2],
+            ['one' => 1],
+            ['two' => 2],
+            ['three' => 3],
+        ]);
+        $this->assertSame(
+            <<<'EOS'
+            one,two,three
+            1,2,3
+            ,2,3
+            1,,3
+            1,2,
+            1,,
+            ,2,
+            ,,3
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
+    }
+
+    /**
+     * Test that strict mode off works.
+     *
+     * @return void
+     */
+    public function testUnknownColumnLenient(): void
+    {
+        $csv = new Writer([
+            'file' => $this->getTempFile(),
+            'strict' => false,
+        ]);
+        $csv->writeFromIterator([
+            ['foo' => 1, 'bar' => 2],
+            ['foo' => 3, 'bar' => 4],
+            ['foo' => 5, 'bar' => 6, 'baz' => 7],
+        ]);
+        $this->assertSame(
+            <<<'EOS'
+            foo,bar
+            1,2
+            3,4
+            5,6
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
+    }
+
+    /**
+     * Test that strict mode on works.
+     *
+     * @return void
+     */
+    public function testUnknownColumnStrict(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $csv = new Writer([
+            'file' => $this->getTempFile(),
+            'strict' => true,
+        ]);
+        $csv->writeFromIterator([
+            ['foo' => 1, 'bar' => 2],
+            ['foo' => 3, 'bar' => 4],
+            ['foo' => 5, 'bar' => 6, 'baz' => 7],
+        ]);
+    }
+
+    /**
      * Test that we detect failure to write to the output file.
      *
      * @return void
      */
-    public function testWriteFail()
+    public function testWriteFail(): void
     {
         $this->expectException(\RuntimeException::class);
         vfsStream::setQuota(1);
-        $csv = new \Ork\Csv\Writer([
+        $csv = new Writer([
             'file' => $this->getTempFile(),
             'header' => false,
         ]);
@@ -217,66 +405,86 @@ class WriterTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Test that we can iterate over an array.
+     *
+     * @return void
+     */
+    public function testWriteFromIteratorWithArray(): void
+    {
+        $csv = new Writer(['file' => $this->getTempFile()]);
+        $this->assertSame(
+            3,
+            $csv->writeFromIterator([
+                ['foo' => 1, 'bar' => 2, 'baz' => 3],
+                ['foo' => 4, 'bar' => 5, 'baz' => 6],
+                ['foo' => 7, 'bar' => 8, 'baz' => 9],
+            ])
+        );
+        $this->assertSame(
+            <<<'EOS'
+            foo,bar,baz
+            1,2,3
+            4,5,6
+            7,8,9
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
+    }
+
+    /**
+     * Test that we can iterate over an iterator.
+     *
+     * @return void
+     */
+    public function testWriteFromIteratorWithTraversable(): void
+    {
+        $csv = new Writer(['file' => $this->getTempFile()]);
+        $this->assertSame(
+            3,
+            $csv->writeFromIterator(
+                new \ArrayIterator([
+                    ['foo' => 1, 'bar' => 2, 'baz' => 3],
+                    ['foo' => 4, 'bar' => 5, 'baz' => 6],
+                    ['foo' => 7, 'bar' => 8, 'baz' => 9],
+                ])
+            )
+        );
+        $this->assertSame(
+            <<<'EOS'
+            foo,bar,baz
+            1,2,3
+            4,5,6
+            7,8,9
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
+    }
+
+    /**
      * Test that we create the header correctly.
      *
      * @return void
      */
-    public function testWriteHeader()
+    public function testWriteHeader(): void
     {
-        $csv = new \Ork\Csv\Writer([
-            'file' => $this->getTempFile(),
-            'header' => true,
+        $csv = new Writer(['file' => $this->getTempFile()]);
+        $csv->writeFromIterator([
+            ['Id' => 1, 'Name' => 'foo'],
+            ['Id' => 2, 'Name' => 'bar'],
+            ['Id' => 3, 'Name' => 'baz'],
         ]);
-        $csv->write([
-            'Id' => 1,
-            'Name' => 'foo',
-        ]);
-        $csv->write([
-            'Id' => 2,
-            'Name' => 'bar',
-        ]);
-        $csv->write([
-            'Id' => 3,
-            'Name' => 'baz',
-        ]);
-        unset($csv);
-        $this->assertSame('2fc774926f1155e3f70065241680043e', md5_file($this->getTempFile()));
-    }
+        $this->assertSame(
+            <<<'EOS'
+            Id,Name
+            1,foo
+            2,bar
+            3,baz
 
-    /**
-     * Test that we properly override column names.
-     *
-     * @return void
-     */
-    public function testWriteHeaderOverride()
-    {
-        $csv = new \Ork\Csv\Writer([
-            'file' => $this->getTempFile(),
-            'header' => true,
-            'columns' => ['one', 'two', 'three'],
-        ]);
-        $csv->write([
-            'one' => 1,
-            'two' => 2,
-            'three' => 3,
-        ]);
-        $csv->write([
-            'two' => 2,
-            'three' => 3,
-        ]);
-        $csv->write([
-            'one' => 1,
-            'three' => 3,
-        ]);
-        $csv->write([
-            'one' => 1,
-            'two' => 2,
-        ]);
-        $csv->write(['one' => 1]);
-        $csv->write(['two' => 2]);
-        $csv->write(['three' => 3]);
-        unset($csv);
-        $this->assertEquals('46b70113332cec6212541e14dc8f417c', md5_file($this->getTempFile()));
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
     }
 
     /**
@@ -284,16 +492,22 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      */
-    public function testWriteNoHeader()
+    public function testWriteNoHeader(): void
     {
-        $csv = new \Ork\Csv\Writer([
+        $csv = new Writer([
             'file' => $this->getTempFile(),
             'header' => false,
         ]);
         $csv->write([1, 2, 3, 4, 5]);
         $csv->write([6, 7, 8, 9, 10]);
-        unset($csv);
-        $this->assertSame('66f1d63c002cde9257adc36a7ed58c31', md5_file($this->getTempFile()));
+        $this->assertSame(
+            <<<'EOS'
+            1,2,3,4,5
+            6,7,8,9,10
+
+            EOS,
+            file_get_contents($this->getTempFile())
+        );
     }
 
 }

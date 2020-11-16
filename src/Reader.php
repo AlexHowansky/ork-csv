@@ -24,25 +24,10 @@ class Reader extends CsvAbstract implements \IteratorAggregate
      */
     protected $config = [
 
-        /**
-         * Callback functions to be run on the values after they're extracted. If using a header row, the array index
-         * should be the name of the field to apply callbacks to. Alternatively, if the index string begins with a
-         * slash, it will be treated as a regex and applied to all matching fields. If not using a header row, the
-         * array index should be the numerical index of the column to apply the callback(s) to. The value for each
-         * entry can be a single callable or an array of callables. Each callable should expect one parameter and
-         * return one value. For example:
-         *
-         * [
-         *     '/./' => 'trim',
-         *     'name' => 'strtolower',
-         *     'email' => ['strtolower', 'trim'],
-         *     'phone' => [[$someObject, 'methodName']],
-         * ]
-         */
+        // Callback functions to be run on the values after they're extracted.
         'callbacks' => [],
 
-        // The column names to assign. If `header` is true and this is empty, the values from the header row are used.
-        // If `header` is true and this is not empty, these values are used instead.
+        // The column names to assign.
         'columns' => [],
 
         // The field delimiter character.
@@ -61,13 +46,6 @@ class Reader extends CsvAbstract implements \IteratorAggregate
         'quote' => '"',
 
     ];
-
-    /**
-     * Contains the line count.
-     *
-     * @var int
-     */
-    protected $line = 0;
 
     /**
      * Make sure we have unique column names.
@@ -168,16 +146,6 @@ class Reader extends CsvAbstract implements \IteratorAggregate
             }
         }
         fclose($csv);
-    }
-
-    /**
-     * Get the current line number.
-     *
-     * @return int The current line number.
-     */
-    public function getLineNumber(): int
-    {
-        return $this->line;
     }
 
     /**

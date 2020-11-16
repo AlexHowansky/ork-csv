@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 1.4.0
+
+* Added `strict` parameter to Writer.
+* Added `getLineCount` method to Writer.
+* Added `writeFromIterator` method to Writer.
+* Disassociate `header` parameter from whether or not the input array is
+  indexed or associative
+
 ## 1.3.0
 
 * Removed support for PHP 7.2.
