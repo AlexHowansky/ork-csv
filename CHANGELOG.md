@@ -2,6 +2,7 @@
 
 ## 1.4.0
 
+* Added support for PHP 8.0.
 * Added `strict` parameter to Writer.
 * Added `getLineCount` method to Writer.
 * Added `writeFromIterator` method to Writer.

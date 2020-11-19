@@ -126,7 +126,7 @@ class Reader extends CsvAbstract implements \IteratorAggregate
                 $this->getConfig('quote'),
                 $this->getConfig('escape')
             );
-            if ($fields === false || $fields === null) {
+            if (is_array($fields) === false) {
                 break;
             }
             if (++$this->line === 1 && $this->getConfig('header') === true) {
