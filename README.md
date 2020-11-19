@@ -12,6 +12,8 @@ Ork CSV is a library for reading and writing CSV files.
 ## Requirements
 
 * PHP 7.3
+* PHP 7.4
+* PHP 8.0
 
 ## Installation
 
