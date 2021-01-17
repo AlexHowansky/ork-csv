@@ -20,8 +20,8 @@
         "mikey179/vfsstream": "^1.6.8",
         "ork/phpcs": "^2.2.0",
         "phpmetrics/phpmetrics": "^2.7.4",
-        "phpstan/phpstan": ">=0.12.56 <1.0.0",
-        "phpunit/phpunit": "^9.4.3",
+        "phpstan/phpstan": ">=0.12.57 <1.0.0",
+        "phpunit/phpunit": "^9.5.1",
         "roave/security-advisories": "dev-master"
     },
     "autoload": {
@@ -35,10 +35,11 @@
         }
     },
     "scripts": {
+        "coverage": "XDEBUG_MODE=coverage phpunit",
         "markdown": "markdownlint *.md docs",
         "metrics": "phpmetrics --config=phpmetrics.json",
         "phpcs": "phpcs",
         "phpstan": "phpstan analyze",
-        "test": "phpunit"
+        "test": "phpunit --no-coverage"
     }
 }
