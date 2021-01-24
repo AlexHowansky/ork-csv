@@ -20,7 +20,7 @@
         "mikey179/vfsstream": "^1.6.8",
         "ork/phpcs": "^2.2.0",
         "phpmetrics/phpmetrics": "^2.7.4",
-        "phpstan/phpstan": ">=0.12.57 <1.0.0",
+        "phpstan/phpstan": ">=0.12.69 <1.0.0",
         "phpunit/phpunit": "^9.5.1",
         "roave/security-advisories": "dev-master"
     },
