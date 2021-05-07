@@ -18,10 +18,10 @@
     },
     "require-dev": {
         "mikey179/vfsstream": "^1.6.8",
-        "ork/phpcs": "^2.2.0",
+        "ork/phpcs": "^2.3.0",
         "phpmetrics/phpmetrics": "^2.7.4",
-        "phpstan/phpstan": ">=0.12.69 <1.0.0",
-        "phpunit/phpunit": "^9.5.1",
+        "phpstan/phpstan": ">=0.12.85 <1.0.0",
+        "phpunit/phpunit": "^9.5.4",
         "roave/security-advisories": "dev-master"
     },
     "autoload": {
@@ -31,7 +31,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "OrkTest\\Csv\\": "tests/"
+            "Ork\\Csv\\Tests\\": "tests/"
         }
     },
     "scripts": {

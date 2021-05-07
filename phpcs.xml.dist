@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="Ork CSV">
-    <rule ref="vendor/ork/phpcs/Ork"/>
+    <rule ref="Ork"/>
     <rule ref="Squiz.PHP.Heredoc.NotAllowed">
         <exclude-pattern>tests/*</exclude-pattern>
     </rule>

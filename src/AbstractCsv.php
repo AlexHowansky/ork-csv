@@ -4,7 +4,7 @@
  * Ork CSV
  *
  * @package   Ork\Csv
- * @copyright 2015-2020 Alex Howansky (https://github.com/AlexHowansky)
+ * @copyright 2015-2021 Alex Howansky (https://github.com/AlexHowansky)
  * @license   https://github.com/AlexHowansky/ork-csv/blob/master/LICENSE MIT License
  * @link      https://github.com/AlexHowansky/ork-csv
  */
@@ -14,7 +14,7 @@ namespace Ork\Csv;
 /**
  * CSV abstract.
  */
-abstract class CsvAbstract
+abstract class AbstractCsv
 {
 
     use \Ork\Core\ConfigurableTrait;

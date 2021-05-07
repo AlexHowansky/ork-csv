@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.4.1
+
+* Updated dependencies.
+* Changed test namespace.
+
 ## 1.4.0
 
 * Added support for PHP 8.0.
