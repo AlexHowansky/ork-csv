@@ -14,14 +14,14 @@
     ],
     "require": {
         "php": ">=7.3.0",
-        "ork/core": "^1.2.0"
+        "ork/core": "^1.2.1"
     },
     "require-dev": {
-        "mikey179/vfsstream": "^1.6.8",
-        "ork/phpcs": "^2.3.0",
+        "mikey179/vfsstream": "^1.6.10",
+        "ork/phpcs": "^2.5.1",
         "phpmetrics/phpmetrics": "^2.7.4",
-        "phpstan/phpstan": ">=0.12.85 <1.0.0",
-        "phpunit/phpunit": "^9.5.4",
+        "phpstan/phpstan": ">=0.12.99 <1.0.0",
+        "phpunit/phpunit": "^9.5.10",
         "roave/security-advisories": "dev-master"
     },
     "autoload": {
