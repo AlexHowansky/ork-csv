@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2bed9d4de3794e27e96c47d2ef84678d",
+    "content-hash": "01665653881ef18a610a7b2f48482f7e",
     "packages": [
         {
             "name": "ork/core",
