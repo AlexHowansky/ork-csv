@@ -3,17 +3,17 @@
 Ork CSV is a library for reading and writing CSV files.
 
 [![Latest Stable Version](https://img.shields.io/packagist/v/ork/csv.svg?style=flat)][1]
-[![PHPStan Enabled](https://img.shields.io/badge/PHPStan-max-brightgreen.svg?style=flat)][2]
 [![PHP](https://img.shields.io/packagist/php-v/ork/csv.svg?style=flat)][3]
+[![PHPStan Enabled](https://img.shields.io/badge/PHPStan-max-brightgreen.svg?style=flat)][2]
 [![License](https://img.shields.io/github/license/AlexHowansky/ork-csv.svg?style=flat)][4]
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AlexHowansky/ork-csv/tests?style=flat&label=workflow)][5]
-[![Travis Build Status](https://img.shields.io/travis/AlexHowansky/ork-csv/master.svg?style=flat&label=Travis)][6]
 
 ## Requirements
 
 * PHP 7.3
 * PHP 7.4
 * PHP 8.0
+* PHP 8.1
 
 ## Installation
 

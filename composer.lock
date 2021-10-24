@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "01665653881ef18a610a7b2f48482f7e",
+    "content-hash": "9dfa3975d23b86a14af1b03e13bba46f",
     "packages": [
         {
             "name": "ork/core",
@@ -366,16 +366,16 @@
         },
         {
             "name": "ork/phpcs",
-            "version": "2.5.2",
+            "version": "2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/AlexHowansky/ork-phpcs.git",
-                "reference": "0d554547886a4827f263db3af4fdf523164366ff"
+                "reference": "724ee29da5bdb4a0732ec0dce649ee2db8e61e23"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/AlexHowansky/ork-phpcs/zipball/0d554547886a4827f263db3af4fdf523164366ff",
-                "reference": "0d554547886a4827f263db3af4fdf523164366ff",
+                "url": "https://api.github.com/repos/AlexHowansky/ork-phpcs/zipball/724ee29da5bdb4a0732ec0dce649ee2db8e61e23",
+                "reference": "724ee29da5bdb4a0732ec0dce649ee2db8e61e23",
                 "shasum": ""
             },
             "require": {
@@ -402,9 +402,9 @@
             ],
             "support": {
                 "issues": "https://github.com/AlexHowansky/ork-phpcs/issues",
-                "source": "https://github.com/AlexHowansky/ork-phpcs/tree/2.5.2"
+                "source": "https://github.com/AlexHowansky/ork-phpcs/tree/2.6.0"
             },
-            "time": "2021-10-11T17:07:12+00:00"
+            "time": "2021-10-20T23:24:56+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -2554,7 +2554,6 @@
                     "type": "github"
                 }
             ],
-            "abandoned": true,
             "time": "2020-09-28T06:45:17+00:00"
         },
         {

@@ -3,12 +3,25 @@ name: tests
 on: [push]
 
 jobs:
-  build:
+  tests:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        php: [7.3, 7.4, 8.0, 8.1]
+
+    name: PHP ${{ matrix.php }} on ${{ matrix.os }}
+
     steps:
-    - uses: actions/checkout@v1
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: install PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
 
     - name: composer validate
       run: composer validate
