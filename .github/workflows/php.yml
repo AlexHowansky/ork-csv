@@ -1,16 +1,19 @@
 name: tests
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   tests:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         os: [ubuntu-latest]
-        php: [7.3, 7.4, 8.0, 8.1]
+        php: [7.4, 8.0, 8.1]
 
     name: PHP ${{ matrix.php }} on ${{ matrix.os }}
 
@@ -26,14 +29,17 @@ jobs:
     - name: composer validate
       run: composer validate
 
+    - name: composer check-platform-reqs
+      run: composer check-platform-reqs
+
     - name: composer install
       run: composer install --prefer-dist --no-progress --no-suggest
 
     - name: PHPCS
-      run: composer run-script phpcs
+      run: composer phpcs
 
     - name: PHPStan
-      run: composer run-script phpstan
+      run: composer phpstan
 
     - name: PHPUnit
-      run: composer run-script test
+      run: composer test

@@ -11,6 +11,8 @@
 
 namespace Ork\Csv;
 
+use RuntimeException;
+
 /**
  * CSV writer.
  */
@@ -22,14 +24,14 @@ class Writer extends AbstractCsv
      *
      * @var array
      */
-    protected $columns = null;
+    protected ?array $columns = null;
 
     /**
      * Configurable trait settings.
      *
      * @var array
      */
-    protected $config = [
+    protected array $config = [
 
         // Callback functions to be run on the values before they're output.
         'callbacks' => [],
@@ -49,7 +51,7 @@ class Writer extends AbstractCsv
         // Write a header row with column names?
         'header' => true,
 
-        // The field quote charater.
+        // The field quote character.
         'quote' => '"',
 
         // If true, abort when encountering columns not described in the header. If false, ignore them.
@@ -81,7 +83,7 @@ class Writer extends AbstractCsv
      *
      * @return int The number of bytes written.
      *
-     * @throws \RuntimeException On error.
+     * @throws RuntimeException On error.
      */
     protected function put(array $row): int
     {
@@ -96,7 +98,7 @@ class Writer extends AbstractCsv
         // As long as we use the awfully convenient fputcsv() function, it's not trivial to measure how many bytes we
         // should have written, so we'll just ensure we have at least one per element.
         if ($result === false || $result < count($row)) {
-            throw new \RuntimeException('Failed writing to file: ' . $this->getConfig('file'));
+            throw new RuntimeException('Failed writing to file: ' . $this->getConfig('file'));
         }
 
         return $result;
@@ -109,7 +111,7 @@ class Writer extends AbstractCsv
      *
      * @return int The number of bytes written.
      *
-     * @throws \RuntimeException On error.
+     * @throws RuntimeException On error.
      */
     public function write(array $row): int
     {
@@ -120,7 +122,7 @@ class Writer extends AbstractCsv
         if ($this->csv === null) {
             $csv = fopen($this->getConfig('file'), 'w');
             if (is_resource($csv) === false) {
-                throw new \RuntimeException('Failed to create file: ' . $this->getConfig('file'));
+                throw new RuntimeException('Failed to create file: ' . $this->getConfig('file'));
             }
             $this->csv = $csv;
         }
@@ -141,7 +143,7 @@ class Writer extends AbstractCsv
         if ($this->getConfig('strict') === true) {
             foreach (array_keys($row) as $column) {
                 if (array_key_exists($column, $this->columns) === false) {
-                    throw new \RuntimeException('Unknown column "' . $column . '" on line ' . $this->line);
+                    throw new RuntimeException('Unknown column "' . $column . '" on line ' . $this->line);
                 }
             }
         }
@@ -160,7 +162,7 @@ class Writer extends AbstractCsv
     }
 
     /**
-     * Write multiple rows from an array or itertor.
+     * Write multiple rows from an array or iterator.
      *
      * @param iterable $rows The iterator to iterate over.
      *

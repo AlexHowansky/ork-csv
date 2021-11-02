@@ -11,20 +11,22 @@
 
 namespace Ork\Csv;
 
+use Ork\Core\ConfigurableTrait;
+
 /**
  * CSV abstract.
  */
 abstract class AbstractCsv
 {
 
-    use \Ork\Core\ConfigurableTrait;
+    use ConfigurableTrait;
 
     /**
      * Contains the line count.
      *
      * @var int
      */
-    protected $line = 0;
+    protected int $line = 0;
 
     /**
      * Apply callbacks.
@@ -32,8 +34,6 @@ abstract class AbstractCsv
      * @param array $row The row to process.
      *
      * @return array The processed row.
-     *
-     * @throws \RuntimeException On missing column reference.
      */
     protected function applyCallbacks(array $row): array
     {

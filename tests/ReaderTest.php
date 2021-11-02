@@ -12,20 +12,23 @@
 namespace Ork\Csv\Tests;
 
 use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
 use Ork\Csv\Reader;
+use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
  * Test the Reader class.
  */
-class ReaderTest extends \PHPUnit\Framework\TestCase
+class ReaderTest extends TestCase
 {
 
     /**
      * VFS handle.
      *
-     * @var \org\bovigo\vfs\vfsStreamDirectory
+     * @var vfsStreamDirectory
      */
-    protected $vfs;
+    protected vfsStreamDirectory $vfs;
 
     /**
      * Make a temporary file for reading.
@@ -70,7 +73,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testBadPerms(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $file = $this->makeFile();
         chmod($file, 0000);
         $csv = new Reader(['file' => $file]);
@@ -235,7 +238,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetBadColumnViaInt(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $csv = new Reader([
             'file' => $this->makeFile(
                 <<<'EOS'
@@ -255,7 +258,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetBadColumnViaString(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $csv = new Reader([
             'file' => $this->makeFile(
                 <<<'EOS'
@@ -524,7 +527,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testMismatchFile(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $csv = new Reader([
             'file' => $this->makeFile(
                 <<<'EOS'
@@ -545,7 +548,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testMissingFile(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $csv = new Reader([
             'file' => $this->vfs->url() . '/fileThatDoesNotExist',
         ]);
@@ -560,7 +563,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testNonUniqueColumn(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $csv = new Reader([
             'file' => $this->makeFile(
                 <<<'EOS'
@@ -581,7 +584,7 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      */
     public function testNotUniqueHeaderFile(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $csv = new Reader([
             'file' => $this->makeFile(
                 <<<'EOS'
@@ -604,13 +607,13 @@ class ReaderTest extends \PHPUnit\Framework\TestCase
      *
      * @return void
      *
-     * @throws \RuntimeException On error.
+     * @throws RuntimeException On error.
      */
     public function testStdin(): void
     {
         $fh = fopen('php://stdin', 'r');
         if ($fh === false) {
-            throw new \RuntimeException('STDIN open failed');
+            throw new RuntimeException('STDIN open failed');
         }
         stream_set_blocking($fh, false);
         fclose($fh);

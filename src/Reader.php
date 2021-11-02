@@ -11,18 +11,22 @@
 
 namespace Ork\Csv;
 
+use Generator;
+use IteratorAggregate;
+use RuntimeException;
+
 /**
  * CSV reader.
  */
-class Reader extends AbstractCsv implements \IteratorAggregate
+class Reader extends AbstractCsv implements IteratorAggregate
 {
 
     /**
-     * Configurable trait settings.
+     * Configurable trait parameters.
      *
      * @var array
      */
-    protected $config = [
+    protected array $config = [
 
         // Callback functions to be run on the values after they're extracted.
         'callbacks' => [],
@@ -42,7 +46,7 @@ class Reader extends AbstractCsv implements \IteratorAggregate
         // True if the first row contains column names.
         'header' => true,
 
-        // The field quote charater.
+        // The field quote character.
         'quote' => '"',
 
     ];
@@ -54,12 +58,12 @@ class Reader extends AbstractCsv implements \IteratorAggregate
      *
      * @return array
      *
-     * @throws \RuntimeException If column names are not unique.
+     * @throws RuntimeException If column names are not unique.
      */
     protected function filterConfigColumns(array $columns): array
     {
         if (count($columns) !== count(array_unique($columns))) {
-            throw new \RuntimeException('Column names must be unique.');
+            throw new RuntimeException('Column names must be unique.');
         }
         return $columns;
     }
@@ -69,15 +73,15 @@ class Reader extends AbstractCsv implements \IteratorAggregate
      *
      * @param int|string $column The column to get.
      *
-     * @return \Generator
+     * @return Generator
      *
-     * @throws \RuntimeException On missing column reference.
+     * @throws RuntimeException On missing column reference.
      */
-    public function getColumn($column): \Generator
+    public function getColumn($column): Generator
     {
         foreach ($this as $row) {
             if (array_key_exists($column, $row) === false) {
-                throw new \RuntimeException('No such column: ' . $column);
+                throw new RuntimeException('No such column: ' . $column);
             }
             yield $row[$column];
         }
@@ -105,17 +109,17 @@ class Reader extends AbstractCsv implements \IteratorAggregate
     }
 
     /**
-     * Required by \IteratorAggregate interface.
+     * Required by IteratorAggregate interface.
      *
-     * @return \Generator
+     * @return Generator
      *
-     * @throws \RuntimeException On error reading file.
+     * @throws RuntimeException On error reading file.
      */
-    public function getIterator(): \Generator
+    public function getIterator(): Generator
     {
         $csv = fopen($this->getConfig('file'), 'r');
         if ($csv === false) {
-            throw new \RuntimeException('Failed to open file: ' . $this->getConfig('file'));
+            throw new RuntimeException('Failed to open file: ' . $this->getConfig('file'));
         }
         $this->line = 0;
         while (true) {
@@ -131,15 +135,7 @@ class Reader extends AbstractCsv implements \IteratorAggregate
             }
             if (++$this->line === 1 && $this->getConfig('header') === true) {
                 if (empty($this->getConfig('columns')) === true) {
-                    $this->setConfig(
-                        'columns',
-                        array_map(
-                            function ($field) {
-                                return trim($field);
-                            },
-                            $fields
-                        )
-                    );
+                    $this->setConfig('columns', array_map(fn($field) => trim($field), $fields));
                 }
             } else {
                 yield $this->applyCallbacks($this->map($fields));
@@ -155,7 +151,7 @@ class Reader extends AbstractCsv implements \IteratorAggregate
      *
      * @return array The mapped fields.
      *
-     * @throws \RuntimeException On column mismatch.
+     * @throws RuntimeException On column mismatch.
      */
     protected function map(array $fields): array
     {
@@ -163,7 +159,7 @@ class Reader extends AbstractCsv implements \IteratorAggregate
             return $fields;
         }
         if (count($this->getConfig('columns')) !== count($fields)) {
-            throw new \RuntimeException('Column mismatch on line: ' . $this->line);
+            throw new RuntimeException('Column mismatch on line: ' . $this->line);
         }
         return (array) array_combine($this->getConfig('columns'), $fields);
     }

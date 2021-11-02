@@ -13,8 +13,8 @@
         }
     ],
     "require": {
-        "php": ">=7.3.0",
-        "ork/core": "^1.2.1"
+        "php": ">=7.4.0",
+        "ork/core": "^1.4.0"
     },
     "require-dev": {
         "mikey179/vfsstream": "^1.6.10",
@@ -22,7 +22,8 @@
         "phpmetrics/phpmetrics": "^2.7.4",
         "phpstan/phpstan": ">=0.12.99 <1.0.0",
         "phpunit/phpunit": "^9.5.10",
-        "roave/security-advisories": "dev-master"
+        "roave/security-advisories": "dev-master",
+        "phpcompatibility/php-compatibility": "^9.3"
     },
     "autoload": {
         "psr-4": {

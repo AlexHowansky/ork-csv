@@ -1,9 +1,15 @@
 # CHANGELOG
 
+## 1.5.0
+
+* Removed support for PHP 7.3.
+* Migrated from Travis to Github Actions.
+
 ## 1.4.1
 
 * Updated dependencies.
 * Changed test namespace.
+* This is the last version that supports PHP 7.3.
 
 ## 1.4.0
 
@@ -21,6 +27,7 @@
 ## 1.2.1
 
 * Prevent E_WARNING on reader column mismatch.
+* This is the last version that supports PHP 7.2.
 
 ## 1.2.0
 

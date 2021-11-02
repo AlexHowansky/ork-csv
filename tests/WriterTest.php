@@ -11,21 +11,25 @@
 
 namespace Ork\Csv\Tests;
 
+use ArrayIterator;
 use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
 use Ork\Csv\Writer;
+use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
  * Test the Writer class.
  */
-class WriterTest extends \PHPUnit\Framework\TestCase
+class WriterTest extends TestCase
 {
 
     /**
      * VFS handle.
      *
-     * @var \org\bovigo\vfs\vfsStreamDirectory
+     * @var vfsStreamDirectory
      */
-    protected $vfs;
+    protected vfsStreamDirectory $vfs;
 
     /**
      * Get a virtual file named for the test we're currently running.
@@ -95,9 +99,7 @@ class WriterTest extends \PHPUnit\Framework\TestCase
         $csv = new Writer([
             'file' => $this->getTempFile(),
             'callbacks' => [
-                '/^I/' => function ($value) {
-                    return $value / 10;
-                },
+                '/^I/' => fn($value) => $value / 10,
                 '/e/' => ['strtolower', 'trim', [$this, 'reverse']],
             ],
         ]);
@@ -218,14 +220,14 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      */
     public function testCreateWriteFail(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $csv = new Writer(['file' => 'php://foo']);
         // @phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
         @$csv->write([1, 2, 3, 4, 5]);
     }
 
     /**
-     * Test that we can explictly specify column names.
+     * Test that we can explicitly specify column names.
      *
      * @return void
      */
@@ -375,7 +377,7 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      */
     public function testUnknownColumnStrict(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $csv = new Writer([
             'file' => $this->getTempFile(),
             'strict' => true,
@@ -394,7 +396,7 @@ class WriterTest extends \PHPUnit\Framework\TestCase
      */
     public function testWriteFail(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         vfsStream::setQuota(1);
         $csv = new Writer([
             'file' => $this->getTempFile(),
@@ -443,7 +445,7 @@ class WriterTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(
             3,
             $csv->writeFromIterator(
-                new \ArrayIterator([
+                new ArrayIterator([
                     ['foo' => 1, 'bar' => 2, 'baz' => 3],
                     ['foo' => 4, 'bar' => 5, 'baz' => 6],
                     ['foo' => 7, 'bar' => 8, 'baz' => 9],
