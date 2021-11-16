@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.5.1
+
+* Updated PHPStan to 1.1.
+
 ## 1.5.0
 
 * Removed support for PHP 7.3.

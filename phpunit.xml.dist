@@ -3,7 +3,7 @@
 <phpunit bootstrap="vendor/autoload.php" colors="true" testdox="true" verbose="true">
 
     <testsuites>
-        <testsuite name="Ork CSV">
+        <testsuite name="unit">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
