@@ -1,0 +1,60 @@
+name: codecov
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  coverage:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        php: [7.4]
+
+    name: PHP ${{ matrix.php }} on ${{ matrix.os }}
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: install PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+
+    - name: composer validate --strict
+      run: composer validate
+
+    - name: composer check-platform-reqs
+      run: composer check-platform-reqs
+
+    - name: composer install
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: PHPUnit
+      run: composer coverage
+
+    - name: codecov
+      uses: actions/upload-artifact@v2
+      with:
+      path: ./.junit.xml
+
+  upload:
+
+    needs: [coverage]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: download
+        uses: actions/download-artifact@v2
+
+      - name: upload
+        uses: codecov/codecov-action@v1
