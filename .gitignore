@@ -1,5 +1,5 @@
 .coverage/
-.coverage.xml
+coverage.xml
 .junit.xml
 .metrics/
 .phpunit.result.cache
