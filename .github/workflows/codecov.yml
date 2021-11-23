@@ -40,7 +40,9 @@ jobs:
 
     - name: codecov
       uses: actions/upload-artifact@v2
-      path: ./.junit.xml
+      with:
+        name: coverage
+        path: ./.junit.xml
 
   upload:
 
