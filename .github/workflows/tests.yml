@@ -6,8 +6,54 @@ on:
       - master
 
 jobs:
-  tests:
-    name: test PHP ${{ matrix.php }}
+  phpcs:
+    name: PHPCS
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: install PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 7.4
+
+    - name: composer validate --strict
+      run: composer validate
+
+    - name: composer install
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: PHPCS
+      run: composer phpcs
+
+  phpstan:
+    name: PHPStan
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: install PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 7.4
+
+    - name: composer validate --strict
+      run: composer validate
+
+    - name: composer install
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: PHPStan
+      run: composer phpstan
+
+  unit:
+    name: PHPUnit [${{ matrix.php }}]
 
     runs-on: ubuntu-latest
 
