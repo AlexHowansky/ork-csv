@@ -18,6 +18,7 @@
         </include>
         <report>
             <html outputDirectory=".coverage" />
+            <clover outputFile=".coverage.xml" />
         </report>
     </coverage>
 
