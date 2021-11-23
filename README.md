@@ -2,11 +2,12 @@
 
 Ork CSV is a library for reading and writing CSV files.
 
-[![Latest Stable Version](https://img.shields.io/packagist/v/ork/csv.svg?style=flat)][1]
-[![PHP](https://img.shields.io/packagist/php-v/ork/csv.svg?style=flat)][3]
-[![PHPStan Enabled](https://img.shields.io/badge/PHPStan-max-brightgreen.svg?style=flat)][2]
-[![License](https://img.shields.io/github/license/AlexHowansky/ork-csv.svg?style=flat)][4]
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AlexHowansky/ork-csv/tests?style=flat&label=workflow)][5]
+[![Latest Version](https://img.shields.io/packagist/v/ork/csv.svg)][1]
+[![PHP](https://img.shields.io/packagist/php-v/ork/csv.svg)][2]
+[![License](https://img.shields.io/github/license/AlexHowansky/ork-csv.svg)][3]
+[![PHPStan](https://img.shields.io/badge/PHPStan-8-brightgreen.svg)][4]
+[![Workflow Status](https://img.shields.io/github/workflow/status/AlexHowansky/ork-csv/tests?label=tests)][5]
+[![Code Coverage](https://img.shields.io/codecov/c/github/AlexHowansky/ork-csv)][6]
 
 ## Requirements
 
@@ -118,11 +119,11 @@ composer test
 ```
 
 [1]: https://packagist.org/packages/ork/csv
-[2]: https://github.com/phpstan/phpstan
-[3]: http://php.net
-[4]: https://github.com/AlexHowansky/ork-csv/blob/master/LICENSE
-[5]: https://github.com/AlexHowansky/ork-csv/actions?query=workflow%3Atests
-[6]: https://secure.travis-ci.org/AlexHowansky/ork-csv
+[2]: https://php.net
+[3]: https://github.com/AlexHowansky/ork-csv/blob/master/LICENSE
+[4]: https://github.com/phpstan/phpstan
+[5]: https://github.com/AlexHowansky/ork-csv/actions/workflows/tests.yml
+[6]: https://app.codecov.io/gh/AlexHowansky/ork-csv
 [7]: https://github.com/squizlabs/PHP_CodeSniffer
 [8]: https://github.com/phpstan/phpstan
 [9]: https://github.com/sebastianbergmann/phpunit
