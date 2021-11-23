@@ -1,4 +1,4 @@
-name: tests
+name: analysis
 
 on:
   push:
@@ -6,16 +6,10 @@ on:
       - master
 
 jobs:
-  tests:
+  analysis:
+    name: analysis
 
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        php: [7.4, 8.0, 8.1]
-
-    name: PHP ${{ matrix.php }} on ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
     - name: checkout
@@ -24,13 +18,10 @@ jobs:
     - name: install PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: ${{ matrix.php }}
+        php-version: 7.4
 
-    - name: composer validate
+    - name: composer validate --strict
       run: composer validate
-
-    - name: composer check-platform-reqs
-      run: composer check-platform-reqs
 
     - name: composer install
       run: composer install --prefer-dist --no-progress --no-suggest
@@ -40,6 +31,3 @@ jobs:
 
     - name: PHPStan
       run: composer phpstan
-
-    - name: PHPUnit
-      run: composer test
