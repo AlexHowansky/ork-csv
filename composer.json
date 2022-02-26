@@ -21,7 +21,7 @@
         "ork/phpcs": "^2.7",
         "phpcompatibility/php-compatibility": "^9.3",
         "phpmetrics/phpmetrics": "^2.7",
-        "phpstan/phpstan": "^1.2",
+        "phpstan/phpstan": "^1.4",
         "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-master"
     },
@@ -42,5 +42,10 @@
         "phpcs": "phpcs",
         "phpstan": "phpstan analyze",
         "test": "phpunit --no-coverage"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }
