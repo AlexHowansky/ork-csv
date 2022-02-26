@@ -77,6 +77,25 @@ class Writer extends AbstractCsv
     }
 
     /**
+     * Get the CSV file handle, creating the associated file if it doesn't already exist.
+     *
+     * @return resource The CSV file handle.
+     *
+     * @throws RuntimeException If the file cannot be created.
+     */
+    protected function getCsv()
+    {
+        if ($this->csv === null) {
+            $csv = fopen($this->getConfig('file'), 'w');
+            if (is_resource($csv) === false) {
+                throw new RuntimeException('Failed to create file: ' . $this->getConfig('file'));
+            }
+            $this->csv = $csv;
+        }
+        return $this->csv;
+    }
+
+    /**
      * Write a row to the file.
      *
      * @param array $row The row to write.
@@ -88,7 +107,7 @@ class Writer extends AbstractCsv
     protected function put(array $row): int
     {
         $result = fputcsv(
-            $this->csv,
+            $this->getCsv(),
             $row,
             $this->getConfig('delimiter'),
             $this->getConfig('quote'),
@@ -117,15 +136,6 @@ class Writer extends AbstractCsv
     {
 
         ++$this->line;
-
-        // Open the file if it's not already open.
-        if ($this->csv === null) {
-            $csv = fopen($this->getConfig('file'), 'w');
-            if (is_resource($csv) === false) {
-                throw new RuntimeException('Failed to create file: ' . $this->getConfig('file'));
-            }
-            $this->csv = $csv;
-        }
 
         // Output the header row if we haven't already.
         if ($this->columns === null) {
