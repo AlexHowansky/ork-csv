@@ -21,7 +21,7 @@
         "ork/phpcs": "^2.7",
         "phpcompatibility/php-compatibility": "^9.3",
         "phpmetrics/phpmetrics": "^2.8",
-        "phpstan/phpstan": "^1.7",
+        "phpstan/phpstan": "^1.8",
         "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-master"
     },
