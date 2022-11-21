@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/AlexHowansky/ork-core.git",
-                "reference": "ae39177c5cf64bf67d113089c80d0a00c58180bf"
+                "reference": "e3e5e53273db9d7e99f74731a6d74bb16c633649"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/AlexHowansky/ork-core/zipball/ae39177c5cf64bf67d113089c80d0a00c58180bf",
-                "reference": "ae39177c5cf64bf67d113089c80d0a00c58180bf",
+                "url": "https://api.github.com/repos/AlexHowansky/ork-core/zipball/e3e5e53273db9d7e99f74731a6d74bb16c633649",
+                "reference": "e3e5e53273db9d7e99f74731a6d74bb16c633649",
                 "shasum": ""
             },
             "require": {
@@ -59,7 +59,7 @@
                 "issues": "https://github.com/AlexHowansky/ork-core/issues",
                 "source": "https://github.com/AlexHowansky/ork-core/tree/1.5.0"
             },
-            "time": "2022-11-21T17:13:31+00:00"
+            "time": "2022-11-21T17:22:16+00:00"
         }
     ],
     "packages-dev": [
