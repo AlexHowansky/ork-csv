@@ -140,9 +140,7 @@ class Writer extends AbstractCsv
         // Output the header row if we haven't already.
         if ($this->columns === null) {
             $this->columns = array_flip(
-                $this->getConfig('columns') === null
-                    ? array_keys($row)
-                    : $this->getConfig('columns')
+                $this->getConfig('columns') ?? array_keys($row)
             );
             if ($this->getConfig('header') === true) {
                 $this->put(array_keys($this->columns));

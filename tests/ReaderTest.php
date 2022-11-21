@@ -58,8 +58,6 @@ class ReaderTest extends TestCase
 
     /**
      * Set up each test.
-     *
-     * @return void
      */
     public function setUp(): void
     {
@@ -68,8 +66,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we can't read a file with restrictive perms.
-     *
-     * @return void
      */
     public function testBadPerms(): void
     {
@@ -83,8 +79,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we can specify callbacks for columns that might not exist.
-     *
-     * @return void
      */
     public function testCallbacksOnMissingColumn(): void
     {
@@ -111,8 +105,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that regex callbacks work.
-     *
-     * @return void
      */
     public function testCallbacksRegex(): void
     {
@@ -141,8 +133,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that multiple regex callbacks on the same field work.
-     *
-     * @return void
      */
     public function testCallbacksRegexMultiple(): void
     {
@@ -172,8 +162,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that callbacks with a header row work.
-     *
-     * @return void
      */
     public function testCallbacksWithHeader(): void
     {
@@ -202,8 +190,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that callbacks without a header row work.
-     *
-     * @return void
      */
     public function testCallbacksWithoutHeader(): void
     {
@@ -233,8 +219,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that referencing a bad column in a headerless file fails.
-     *
-     * @return void
      */
     public function testGetBadColumnViaInt(): void
     {
@@ -253,8 +237,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that getting a bad column from a header file fails.
-     *
-     * @return void
      */
     public function testGetBadColumnViaString(): void
     {
@@ -274,8 +256,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we can get the columns from a header file.
-     *
-     * @return void
      */
     public function testGetColumns(): void
     {
@@ -294,8 +274,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we get empty columns from a headerless file.
-     *
-     * @return void
      */
     public function testGetColumnsHeaderless(): void
     {
@@ -314,8 +292,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we can get a column from a headerless file by integer.
-     *
-     * @return void
      */
     public function testGetColumnViaInt(): void
     {
@@ -335,8 +311,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we can get a column from a header file via column name.
-     *
-     * @return void
      */
     public function testGetColumnViaString(): void
     {
@@ -356,8 +330,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we can override the columns of a file with headers.
-     *
-     * @return void
      */
     public function testHeaderColumnOverride(): void
     {
@@ -379,8 +351,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we properly read a header file.
-     *
-     * @return void
      */
     public function testHeaderFile(): void
     {
@@ -406,8 +376,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we can specify the columns of a file without headers.
-     *
-     * @return void
      */
     public function testHeaderlessColumnExplicit(): void
     {
@@ -427,8 +395,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we properly read a headerless file.
-     *
-     * @return void
      */
     public function testHeaderlessFile(): void
     {
@@ -446,8 +412,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that the line count works with a header file.
-     *
-     * @return void
      */
     public function testLineCountHeader(): void
     {
@@ -474,8 +438,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that the line count works with a headerless file.
-     *
-     * @return void
      */
     public function testLineCountHeaderless(): void
     {
@@ -502,8 +464,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that the line number is zero before we start.
-     *
-     * @return void
      */
     public function testLineNumberZeroBeforeStart(): void
     {
@@ -522,8 +482,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we detect a column mismatch.
-     *
-     * @return void
      */
     public function testMismatchFile(): void
     {
@@ -543,8 +501,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we can't reference files that don't exist.
-     *
-     * @return void
      */
     public function testMissingFile(): void
     {
@@ -558,8 +514,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that using non-unique columns fails.
-     *
-     * @return void
      */
     public function testNonUniqueColumn(): void
     {
@@ -579,8 +533,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that we detect bad headers.
-     *
-     * @return void
      */
     public function testNotUniqueHeaderFile(): void
     {
@@ -605,8 +557,6 @@ class ReaderTest extends TestCase
      * test to pass. However, TravisCI doesn't invoke the tests via the composer wrapper, so this just hangs waiting
      * for input. To avoid that, we'll explicitly set STDIN to non-blocking here.
      *
-     * @return void
-     *
      * @throws RuntimeException On error.
      */
     public function testStdin(): void
@@ -623,8 +573,6 @@ class ReaderTest extends TestCase
 
     /**
      * Test that reading to an associative array works.
-     *
-     * @return void
      */
     public function testToArrayAssociative(): void
     {

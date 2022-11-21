@@ -40,7 +40,7 @@ abstract class AbstractCsv
         foreach ($this->getConfig('callbacks') as $column => $callbacks) {
 
             // Interpret as a regex and apply to all matching columns.
-            if (strpos($column, '/') === 0) {
+            if (str_starts_with($column, '/') === true) {
                 foreach (array_keys($row) as $name) {
                     if (preg_match($column, (string) $name) === 1) {
                         foreach ((array) $callbacks as $callback) {

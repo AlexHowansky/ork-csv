@@ -56,8 +56,6 @@ class Reader extends AbstractCsv implements IteratorAggregate
      *
      * @param array $columns The column names.
      *
-     * @return array
-     *
      * @throws RuntimeException If column names are not unique.
      */
     protected function filterConfigColumns(array $columns): array
@@ -73,11 +71,9 @@ class Reader extends AbstractCsv implements IteratorAggregate
      *
      * @param int|string $column The column to get.
      *
-     * @return Generator
-     *
      * @throws RuntimeException On missing column reference.
      */
-    public function getColumn($column): Generator
+    public function getColumn(int|string $column): Generator
     {
         foreach ($this as $row) {
             if (array_key_exists($column, $row) === false) {
@@ -110,8 +106,6 @@ class Reader extends AbstractCsv implements IteratorAggregate
 
     /**
      * Required by IteratorAggregate interface.
-     *
-     * @return Generator
      *
      * @throws RuntimeException On error reading file.
      */
@@ -170,8 +164,6 @@ class Reader extends AbstractCsv implements IteratorAggregate
      * @param string $column If $column is provided, the resulting array will be associative and the value in the
      *                       field named by $column will be used as the array key. If $column is not provided, the
      *                       resulting array will indexed.
-     *
-     * @return array
      */
     public function toArray(string $column = null): array
     {

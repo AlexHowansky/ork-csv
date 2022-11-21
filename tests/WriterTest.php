@@ -33,8 +33,6 @@ class WriterTest extends TestCase
 
     /**
      * Get a virtual file named for the test we're currently running.
-     *
-     * @return string
      */
     protected function getTempFile(): string
     {
@@ -55,8 +53,6 @@ class WriterTest extends TestCase
 
     /**
      * Set up each test.
-     *
-     * @return void
      */
     public function setUp(): void
     {
@@ -65,8 +61,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we can specify callbacks for columns that might not exist.
-     *
-     * @return void
      */
     public function testCallbacksOnMissingColumn(): void
     {
@@ -91,8 +85,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that regex callbacks work.
-     *
-     * @return void
      */
     public function testCallbacksRegex(): void
     {
@@ -122,8 +114,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that multiple regex callbacks on the same field work.
-     *
-     * @return void
      */
     public function testCallbacksRegexMultiple(): void
     {
@@ -153,8 +143,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that callbacks work on associative array input.
-     *
-     * @return void
      */
     public function testCallbacksWithAssociative(): void
     {
@@ -184,8 +172,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that callbacks work on files with indexed array input.
-     *
-     * @return void
      */
     public function testCallbacksWithIndexed(): void
     {
@@ -215,8 +201,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we detect failure to create the output file.
-     *
-     * @return void
      */
     public function testCreateWriteFail(): void
     {
@@ -228,8 +212,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we can explicitly specify column names.
-     *
-     * @return void
      */
     public function testExplicitColumns(): void
     {
@@ -255,8 +237,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we get a proper line count.
-     *
-     * @return void
      */
     public function testGetLineNumber(): void
     {
@@ -272,8 +252,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we correctly rearrange out-of-order columns.
-     *
-     * @return void
      */
     public function testOutOfOrderColumns(): void
     {
@@ -297,8 +275,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that the write() return value is correct.
-     *
-     * @return void
      */
     public function testReturnValue(): void
     {
@@ -311,8 +287,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we can skip columns.
-     *
-     * @return void
      */
     public function testSkippedColumns(): void
     {
@@ -344,8 +318,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that strict mode off works.
-     *
-     * @return void
      */
     public function testUnknownColumnLenient(): void
     {
@@ -372,8 +344,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that strict mode on works.
-     *
-     * @return void
      */
     public function testUnknownColumnStrict(): void
     {
@@ -391,8 +361,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we detect failure to write to the output file.
-     *
-     * @return void
      */
     public function testWriteFail(): void
     {
@@ -408,8 +376,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we can iterate over an array.
-     *
-     * @return void
      */
     public function testWriteFromIteratorWithArray(): void
     {
@@ -436,8 +402,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we can iterate over an iterator.
-     *
-     * @return void
      */
     public function testWriteFromIteratorWithTraversable(): void
     {
@@ -466,8 +430,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we create the header correctly.
-     *
-     * @return void
      */
     public function testWriteHeader(): void
     {
@@ -491,8 +453,6 @@ class WriterTest extends TestCase
 
     /**
      * Test that we don't create a header row when specified.
-     *
-     * @return void
      */
     public function testWriteNoHeader(): void
     {
