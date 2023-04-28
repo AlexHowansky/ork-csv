@@ -14,16 +14,16 @@
     ],
     "require": {
         "php": "^8.0",
-        "ork/core": "^1.5"
+        "ork/core": "^2.0.0"
     },
     "require-dev": {
-        "mikey179/vfsstream": "^1.6",
-        "ork/phpcs": "^2.7",
-        "phpcompatibility/php-compatibility": "^9.3",
-        "phpmetrics/phpmetrics": "^2.8",
-        "phpstan/phpstan": "^1.8",
-        "phpunit/phpunit": "^9.5",
-        "rector/rector": "^0.14",
+        "mikey179/vfsstream": "^1.6.11",
+        "ork/phpcs": "^2.8.1",
+        "phpcompatibility/php-compatibility": "^9.3.5",
+        "phpmetrics/phpmetrics": "^2.8.2",
+        "phpstan/phpstan": "^1.10.14",
+        "phpunit/phpunit": "^9.6.7",
+        "rector/rector": "^0.15.25",
         "roave/security-advisories": "dev-master"
     },
     "autoload": {

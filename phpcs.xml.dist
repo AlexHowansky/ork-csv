@@ -5,7 +5,7 @@
     <rule ref="Squiz.PHP.Heredoc.NotAllowed">
         <exclude-pattern>tests/*</exclude-pattern>
     </rule>
-    <config name="php_version" value="80023"/>
+    <config name="php_version" value="80028"/>
     <config name="testVersion" value="8.0-"/>
     <file>src</file>
     <file>tests</file>

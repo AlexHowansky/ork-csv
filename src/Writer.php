@@ -4,7 +4,7 @@
  * Ork CSV
  *
  * @package   Ork\Csv
- * @copyright 2015-2022 Alex Howansky (https://github.com/AlexHowansky)
+ * @copyright 2015-2023 Alex Howansky (https://github.com/AlexHowansky)
  * @license   https://github.com/AlexHowansky/ork-csv/blob/master/LICENSE MIT License
  * @link      https://github.com/AlexHowansky/ork-csv
  */
