@@ -12,6 +12,7 @@
 namespace Ork\Csv;
 
 use RuntimeException;
+use UnexpectedValueException;
 
 /**
  * CSV writer.
@@ -19,60 +20,44 @@ use RuntimeException;
 class Writer extends AbstractCsv
 {
 
+    protected $fileHandle;
+
     /**
-     * Contains the expected column names.
+     * Constructor.
      *
-     * @var array
-     */
-    protected ?array $columns = null;
-
-    /**
-     * Configurable trait settings.
+     * @param string $file The file to process.
+     * @param bool $hasHeader True if the file has a header row with column names.
+     * @param array $columnNames An array of column names to use if the file does not include a header row.
+     * @param array $callbacks Callbacks to apply to columns as they are read.
+     * @param bool $appendToExistingFile True to append output to an existing file.
+     * @param bool $allowUnknownColumns True to allow keys that are not described in the header row.
+     * @param string $delimiterCharacter The CSV delimiter character to use.
+     * @param string $quoteCharacter The CSV quote character to use.
+     * @param string $escapeCharacter The CSV escape character to use.
      *
-     * @var array
+     * @throws UnexpectedValueException If an invalid parameters are provided.
      */
-    protected array $config = [
-
-        // Callback functions to be run on the values before they're output.
-        'callbacks' => [],
-
-        // Explicit list of columns if auto-detection is not desired.
-        'columns' => null,
-
-        // The field delimiter character.
-        'delimiter' => ',',
-
-        // The escape character.
-        'escape' => '\\',
-
-        // The file to write to.
-        'file' => 'php://stdout',
-
-        // Write a header row with column names?
-        'header' => true,
-
-        // The field quote character.
-        'quote' => '"',
-
-        // If true, abort when encountering columns not described in the header. If false, ignore them.
-        'strict' => true,
-
-    ];
+    public function __construct(
+        protected string $file = 'php://stdout',
+        protected bool $hasHeader = true,
+        protected array $columnNames = [],
+        protected array $callbacks = [],
+        protected bool $appendToExistingFile = false,
+        protected bool $allowUnknownColumns = true,
+        protected string $delimiterCharacter = ',',
+        protected string $quoteCharacter = '"',
+        protected string $escapeCharacter = '\\',
+    ) {
+        $this->validateParameters();
+    }
 
     /**
-     * File handle.
-     *
-     * @var resource
-     */
-    protected $csv = null;
-
-    /**
-     * Make sure the file handle is closed.
+     * Make sure the file is closed.
      */
     public function __destruct()
     {
-        if (is_resource($this->csv) === true) {
-            fclose($this->csv);
+        if (is_resource($this->fileHandle) === true) {
+            fclose($this->fileHandle);
         }
     }
 
@@ -83,105 +68,108 @@ class Writer extends AbstractCsv
      *
      * @throws RuntimeException If the file cannot be created.
      */
-    protected function getCsv()
+    protected function getFileHandle()
     {
-        if ($this->csv === null) {
-            $csv = fopen($this->getConfig('file'), 'w');
-            if (is_resource($csv) === false) {
-                throw new RuntimeException('Failed to create file: ' . $this->getConfig('file'));
+        if (isset($this->fileHandle) === false) {
+            // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+            $this->fileHandle = @fopen($this->file, $this->appendToExistingFile === true ? 'a' : 'w');
+            if (is_resource($this->fileHandle) === false) {
+                throw new RuntimeException('Failed to create file: ' . $this->file);
             }
-            $this->csv = $csv;
         }
-        return $this->csv;
+        return $this->fileHandle;
     }
 
     /**
-     * Write a row to the file.
+     * Map the input row to the expected output row.
+     *
+     * If we get an input row that has keys in an order that is different than
+     * the established key order, we need to rearrange the array with the keys
+     * in the expected order.
+     *
+     * If we get an input row that is missing data for established keys, we need
+     * to output a blank column so that the remaining columns align properly.
+     *
+     * @param array $row The input row.
+     *
+     * @return array The output row.
+     */
+    protected function map(array $row): array
+    {
+        $ordered = [];
+        foreach ($this->columnNames as $columnName) {
+            $ordered[] = array_key_exists($columnName, $row) === true ? $row[$columnName] : '';
+        }
+        return $ordered;
+    }
+
+    /**
+     * Write a row to the CSV file.
      *
      * @param array $row The row to write.
      *
      * @return int The number of bytes written.
      *
-     * @throws RuntimeException On error.
+     * @throws RuntimeException If writing fails.
      */
     protected function put(array $row): int
     {
+        ++$this->lineNumber;
         $result = fputcsv(
-            $this->getCsv(),
+            $this->getFileHandle(),
             $row,
-            $this->getConfig('delimiter'),
-            $this->getConfig('quote'),
-            $this->getConfig('escape')
+            $this->delimiterCharacter,
+            $this->quoteCharacter,
+            $this->escapeCharacter
         );
-
-        // As long as we use the awfully convenient fputcsv() function, it's not trivial to measure how many bytes we
-        // should have written, so we'll just ensure we have at least one per element.
-        if ($result === false || $result < count($row)) {
-            throw new RuntimeException('Failed writing to file: ' . $this->getConfig('file'));
+        if ($result === false || $result === 0) {
+            throw new RuntimeException('Failed to write to file: ' . $this->file);
         }
-
         return $result;
     }
 
     /**
-     * Write a row to the file.
+     * Write a row to the CSV file.
      *
      * @param array $row The row to write.
      *
      * @return int The number of bytes written.
      *
-     * @throws RuntimeException On error.
+     * @throws RuntimeException If an unknown column is detected.
      */
     public function write(array $row): int
     {
-
-        ++$this->line;
-
-        // Output the header row if we haven't already.
-        if ($this->columns === null) {
-            $this->columns = array_flip(
-                $this->getConfig('columns') ?? array_keys($row)
-            );
-            if ($this->getConfig('header') === true) {
-                $this->put(array_keys($this->columns));
+        if ($this->lineNumber === 0 && $this->hasHeader === true) {
+            if (empty($this->columnNames) === true) {
+                $this->columnNames = array_keys($row);
+            }
+            if ($this->appendToExistingFile === false) {
+                $this->put($this->columnNames);
             }
         }
-
-        // In strict mode, abort when we get columns we don't know about.
-        if ($this->getConfig('strict') === true) {
-            foreach (array_keys($row) as $column) {
-                if (array_key_exists($column, $this->columns) === false) {
-                    throw new RuntimeException('Unknown column "' . $column . '" on line ' . $this->line);
+        if ($this->allowUnknownColumns === false) {
+            foreach (array_keys($row) as $columnName) {
+                if (array_key_exists($columnName, $this->columnNames) === false) {
+                    throw new RuntimeException('Unknown column detected: ' . $columnName);
                 }
             }
         }
-
         $row = $this->applyCallbacks($row);
-
-        // If this data row doesn't contain values for all the fields in the header row, then insert empty values for
-        // the missing fields, so that the CSV columns line up properly. Also, make sure that the columns are in the
-        // order that was specified in the header row.
-        $ordered = [];
-        foreach (array_keys($this->columns) as $column) {
-            $ordered[] = array_key_exists($column, $row) === true ? $row[$column] : '';
-        }
-        return $this->put($ordered);
-
+        return $this->put(empty($this->columnNames) === true ? $row : $this->map($row));
     }
 
     /**
-     * Write multiple rows from an array or iterator.
+     * Write multiple rows to the CSV file.
      *
-     * @param iterable $rows The iterator to iterate over.
+     * @param iterable $iterator An iterable that yields rows to write.
      *
-     * @return int The number of rows written.
+     * @return void
      */
-    public function writeFromIterator(iterable $rows): int
+    public function writeFrom(iterable $iterator): void
     {
-        foreach ($rows as $row) {
+        foreach ($iterator as $row) {
             $this->write($row);
         }
-        return $this->line;
     }
 
 }

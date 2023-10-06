@@ -1,8 +1,21 @@
 # CHANGELOG
 
+## 2.0.0
+
+* Removed support for PHP 8.0.
+* Migrated `Reader` and `Writer` configuration paramters from
+  `\Ork\Core\ConfigurableTrait` to named constructor parameters.
+* The `$column` parameter of the `Reader::toArray()` method has been removed.
+  Specification of a custom array key is now accomplished via the `keyByColumn`
+  parameter, which preserves the iterative nature of the resulting output.
+* Added `Reader` parameter `detectDuplicateKeys`.
+* Added `Writer` paramter `appendToExistingFile`.
+* Renamed `Writer` parameter from `strict` to `allowUnknownColumns`.
+* Renamed `Writer` method from `writeFromIterator()` to `writeFrom()`.
+
 ## 1.6.0
 
-* Update to require PHP 8.0.
+* Updated to require PHP 8.0.
 
 ## 1.5.1
 

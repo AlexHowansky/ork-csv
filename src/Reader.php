@@ -22,160 +22,152 @@ class Reader extends AbstractCsv implements IteratorAggregate
 {
 
     /**
-     * Configurable trait parameters.
-     *
-     * @var array
+     * If `keyByColumn` is not null and `detectDuplicateKeys` is true, then
+     * we'll need to manually track which keys we've already seen, because
+     * Generators can output duplicates without issue.
      */
-    protected array $config = [
-
-        // Callback functions to be run on the values after they're extracted.
-        'callbacks' => [],
-
-        // The column names to assign.
-        'columns' => [],
-
-        // The field delimiter character.
-        'delimiter' => ',',
-
-        // The escape character.
-        'escape' => '\\',
-
-        // The file to process.
-        'file' => 'php://stdin',
-
-        // True if the first row contains column names.
-        'header' => true,
-
-        // The field quote character.
-        'quote' => '"',
-
-    ];
+    protected array $detectedKeys = [];
 
     /**
-     * Make sure we have unique column names.
+     * Constructor.
      *
-     * @param array $columns The column names.
-     *
-     * @throws RuntimeException If column names are not unique.
+     * @param string $file The file to process.
+     * @param bool $hasHeader True if the file has a header row with column names.
+     * @param array $columnNames An array of column names to use if the file does not include a header row.
+     * @param array $callbacks Callbacks to apply to columns as they are read.
+     * @param int|string|null $keyByColumn Key the generated array by this column.
+     * @param bool $detectDuplicateKeys True to detect duplicate keys when using keyByColumn.
+     * @param string $delimiterCharacter The CSV delimiter character to use.
+     * @param string $quoteCharacter The CSV quote character to use.
+     * @param string $escapeCharacter The CSV escape character to use.
      */
-    protected function filterConfigColumns(array $columns): array
-    {
-        if (count($columns) !== count(array_unique($columns))) {
-            throw new RuntimeException('Column names must be unique.');
-        }
-        return $columns;
+    public function __construct(
+        protected string $file = 'php://stdin',
+        protected bool $hasHeader = true,
+        protected array $columnNames = [],
+        protected array $callbacks = [],
+        protected int|string|null $keyByColumn = null,
+        protected bool $detectDuplicateKeys = true,
+        protected string $delimiterCharacter = ',',
+        protected string $quoteCharacter = '"',
+        protected string $escapeCharacter = '\\',
+    ) {
+        $this->validateParameters();
     }
 
     /**
-     * Get one column.
+     * Get the values from only one specific column.
      *
-     * @param int|string $column The column to get.
+     * @param int|string $column The column to get the values from.
      *
-     * @throws RuntimeException On missing column reference.
+     * @return Generator An iterator over the values.
+     *
+     * @throws RuntimeException If an unknown column is referenced.
      */
     public function getColumn(int|string $column): Generator
     {
         foreach ($this as $row) {
-            if (array_key_exists($column, $row) === false) {
-                throw new RuntimeException('No such column: ' . $column);
-            }
-            yield $row[$column];
+            yield $row[$column] ?? throw new RuntimeException('No such column: ' . $column);
         }
     }
 
     /**
-     * Get the column headers.
+     * Get the column names.
      *
-     * @return array The column headers.
+     * @return array The column names.
      */
-    public function getColumns(): array
+    public function getColumnNames(): array
     {
-
-        // We might have to iterate once to get the header row.
-        if (
-            $this->line === 0 &&
-            $this->getConfig('header') === true &&
-            empty($this->getConfig('columns')) === true
-        ) {
+        // If we have not yet processed any of the file, and we're expecting a
+        // header row, then we'll have to iterate once to read the header row.
+        if ($this->lineNumber === 0 && $this->hasHeader === true) {
             $this->getIterator()->current();
         }
-
-        return $this->getConfig('columns');
-
+        return $this->columnNames;
     }
 
     /**
-     * Required by IteratorAggregate interface.
+     * Get an iterator for the data.
      *
-     * @throws RuntimeException On error reading file.
+     * @return Generator An iterator for the data.
+     *
+     * @throws RuntimeException If the referenced file can not be opened.
      */
     public function getIterator(): Generator
     {
-        $csv = fopen($this->getConfig('file'), 'r');
+        // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+        $csv = @fopen($this->file, 'r');
         if ($csv === false) {
-            throw new RuntimeException('Failed to open file: ' . $this->getConfig('file'));
+            throw new RuntimeException('Failed to open file: ' . $this->file);
         }
-        $this->line = 0;
+        $this->lineNumber = 0;
         while (true) {
-            $fields = fgetcsv(
-                $csv,
-                0,
-                $this->getConfig('delimiter'),
-                $this->getConfig('quote'),
-                $this->getConfig('escape')
-            );
+            $fields = fgetcsv($csv, 0, $this->delimiterCharacter, $this->quoteCharacter, $this->escapeCharacter);
             if (is_array($fields) === false) {
                 break;
             }
-            if (++$this->line === 1 && $this->getConfig('header') === true) {
-                if (empty($this->getConfig('columns')) === true) {
-                    $this->setConfig('columns', array_map(fn($field) => trim($field), $fields));
+            if ($this->lineNumber++ === 0 && $this->hasHeader === true) {
+                if (empty($this->columnNames) === true) {
+                    $this->columnNames = $this->validateColumnNames($fields);
                 }
             } else {
-                yield $this->applyCallbacks($this->map($fields));
+                $row = $this->applyCallbacks($this->map($fields));
+                if ($this->keyByColumn === null) {
+                    yield $row;
+                } else {
+                    yield $this->getKey($row) => $row;
+                }
             }
         }
         fclose($csv);
     }
 
     /**
-     * Map a line's fields to an associative array key according to the headers.
+     * Get the key for a row.
      *
-     * @param array $fields The fields to map.
+     * @param array $row The row to get the key for.
      *
-     * @return array The mapped fields.
+     * @return string The key for this row.
      *
-     * @throws RuntimeException On column mismatch.
+     * @throws RuntimeException If the requested key column is not present or a duplicate key is detected.
      */
-    protected function map(array $fields): array
+    protected function getKey(array $row): string
     {
-        if (empty($this->getConfig('columns')) === true) {
-            return $fields;
+        $key = $row[$this->keyByColumn]
+            ?? throw new RuntimeException('No such column: ' . $this->keyByColumn);
+        if ($this->detectDuplicateKeys === true) {
+            if (array_key_exists($key, $this->detectedKeys) === true) {
+                throw new RuntimeException('Duplicate key detected: ' . $key);
+            }
+            $this->detectedKeys[$key] = true;
         }
-        if (count($this->getConfig('columns')) !== count($fields)) {
-            throw new RuntimeException('Column mismatch on line: ' . $this->line);
-        }
-        return (array) array_combine($this->getConfig('columns'), $fields);
+        return $key;
     }
 
     /**
-     * Convert the entire CSV file to a big array.
+     * Map the indexed input row to an associative array with column names.
      *
-     * @param string $column If $column is provided, the resulting array will be associative and the value in the
-     *                       field named by $column will be used as the array key. If $column is not provided, the
-     *                       resulting array will indexed.
+     * @throws RuntimeException If the number of columns in a row doesn't match the expected number.
      */
-    public function toArray(string $column = null): array
+    protected function map(array $row): array
     {
-        $array = [];
-        foreach ($this as $line) {
-            if ($column === null) {
-                $array[] = $line;
-            } else {
-                $array[$line[$column]] = $line;
-            }
+        if (empty($this->columnNames) === true) {
+            return $row;
         }
-        return $array;
+        if (count($this->columnNames) !== count($row)) {
+            throw new RuntimeException('Column mismatch on line: ' . $this->lineNumber);
+        }
+        return array_combine($this->columnNames, $row);
+    }
+
+    /**
+     * Return the entire file as an array.
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return iterator_to_array($this->getIterator());
     }
 
 }

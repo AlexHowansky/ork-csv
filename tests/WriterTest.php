@@ -19,279 +19,173 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 /**
- * Test the Writer class.
+ * CSV writer test.
  */
 class WriterTest extends TestCase
 {
 
-    /**
-     * VFS handle.
-     *
-     * @var vfsStreamDirectory
-     */
+    protected const DEFAULT_DATA = [
+        ['Id' => 1, 'Name' => 'foo', 'Number' => 123],
+        ['Id' => 2, 'Name' => 'bar', 'Number' => 456],
+        ['Id' => 3, 'Name' => 'baz', 'Number' => 789],
+    ];
+
     protected vfsStreamDirectory $vfs;
 
-    /**
-     * Get a virtual file named for the test we're currently running.
-     */
-    protected function getTempFile(): string
+    protected function getFile(): string
     {
-        return $this->vfs->url() . '/' . debug_backtrace()[1]['function'];
+        $bt = debug_backtrace();
+        return sprintf(
+            '%s/%s',
+            $this->vfs->url(),
+            $bt[1]['function'] === 'getFileContents' ? $bt[2]['function'] : $bt[1]['function']
+        );
+    }
+
+    protected function getFileContents(): string
+    {
+        return file_get_contents($this->getFile());
     }
 
     /**
-     * Wrapper method for filter callable.
-     *
-     * @param string $value The string to reverse.
-     *
-     * @return string The reversed string.
+     * Wrapper to test callbacks using the `$this->reverse(...)` callable style.
      */
     public function reverse(string $value): string
     {
         return strrev($value);
     }
 
-    /**
-     * Set up each test.
-     */
     public function setUp(): void
     {
         $this->vfs = vfsStream::setup();
     }
 
-    /**
-     * Test that we can specify callbacks for columns that might not exist.
-     */
     public function testCallbacksOnMissingColumn(): void
     {
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'callbacks' => ['Email' => ['strtolower', 'trim']],
-        ]);
-        $csv->writeFromIterator([
-            ['Id' => 1, 'Name' => 'Foo'],
-            ['Id' => 2, 'Name' => 'Bar'],
-        ]);
-        $this->assertSame(
-            <<<'EOS'
-            Id,Name
-            1,Foo
-            2,Bar
-
-            EOS,
-            file_get_contents($this->getTempFile())
+        $csv = new Writer(
+            file: $this->getFile(),
+            callbacks: ['DoesNotExist' => 'strtolower'],
         );
+        $csv->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("Id,Name,Number\n1,foo,123\n2,bar,456\n3,baz,789\n", $this->getFileContents());
     }
 
-    /**
-     * Test that regex callbacks work.
-     */
     public function testCallbacksRegex(): void
     {
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'callbacks' => [
-                '/^I/' => fn($value) => $value / 10,
-                '/e/' => ['strtolower', 'trim', [$this, 'reverse']],
-            ],
-        ]);
-        $csv->writeFromIterator([
-            ['Id' => 10, 'Name' => ' FOO '],
-            ['Id' => 20, 'Name' => ' Bar '],
-            ['Id' => 30, 'Name' => 'baz'],
-        ]);
-        $this->assertEquals(
-            <<<'EOS'
-            Id,Name
-            1,oof
-            2,rab
-            3,zab
-
-            EOS,
-            file_get_contents($this->getTempFile())
+        $csv = new Writer(
+            file: $this->getFile(),
+            callbacks: ['/./' => ['strtoupper', 'strrev']],
         );
+        $csv->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("Id,Name,Number\n1,OOF,321\n2,RAB,654\n3,ZAB,987\n", $this->getFileContents());
     }
 
-    /**
-     * Test that multiple regex callbacks on the same field work.
-     */
     public function testCallbacksRegexMultiple(): void
     {
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'callbacks' => [
-                '/./' => 'strtolower',
-                '/e/' => 'trim',
+        $csv = new Writer(
+            file: $this->getFile(),
+            callbacks: [
+                '/./' => 'strtoupper',
+                '/^nu/i' => 'strrev',
             ],
-        ]);
-        $csv->writeFromIterator([
-            ['Id' => 1, 'Name' => ' FOO '],
-            ['Id' => 2, 'Name' => ' Bar '],
-            ['Id' => 3, 'Name' => 'baz'],
-        ]);
-        $this->assertEquals(
-            <<<'EOS'
-            Id,Name
-            1,foo
-            2,bar
-            3,baz
-
-            EOS,
-            file_get_contents($this->getTempFile())
         );
+        $csv->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("Id,Name,Number\n1,FOO,321\n2,BAR,654\n3,BAZ,987\n", $this->getFileContents());
     }
 
-    /**
-     * Test that callbacks work on associative array input.
-     */
-    public function testCallbacksWithAssociative(): void
+    public function testCallbacksViaColumnIndex(): void
     {
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'callbacks' => [
-                'Id' => 'number_format',
-                'Name' => ['strtolower', 'trim', [$this, 'reverse']],
+        $csv = new Writer(
+            file: $this->getFile(),
+            callbacks: [
+                'Name' => [
+                    'strtoupper',
+                    $this->reverse(...),
+                    fn($value) => lcfirst((string) $value),
+                ],
+                'Number' => [
+                    'strrev',
+                    fn($value) => $value * 2,
+                ],
             ],
-        ]);
-        $csv->writeFromIterator([
-            ['Id' => 1000, 'Name' => ' FOO '],
-            ['Id' => 2000, 'Name' => ' Bar '],
-            ['Id' => 3000, 'Name' => 'baz'],
-        ]);
-        $this->assertSame(
-            <<<'EOS'
-            Id,Name
-            "1,000",oof
-            "2,000",rab
-            "3,000",zab
-
-            EOS,
-            file_get_contents($this->getTempFile())
+            hasHeader: false,
         );
+        $csv->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("1,oOF,642\n2,rAB,1308\n3,zAB,1974\n", $this->getFileContents());
     }
 
-    /**
-     * Test that callbacks work on files with indexed array input.
-     */
-    public function testCallbacksWithIndexed(): void
+    public function testCallbacksViaColumnName(): void
     {
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'header' => false,
-            'callbacks' => [
-                0 => 'strtolower',
-                1 => ['strtolower', 'trim', [$this, 'reverse']],
-            ],
-        ]);
-        $csv->writeFromIterator([
-            [' FOO ', ' FOO '],
-            [' Bar ', ' Bar '],
-            ['baz', 'baz'],
-        ]);
-        $this->assertSame(
-            <<<'EOS'
-            " foo ",oof
-            " bar ",rab
-            baz,zab
-
-            EOS,
-            file_get_contents($this->getTempFile())
+        $csv = new Writer(
+            file: $this->getFile(),
+            callbacks: [
+                'Name' => [
+                    'strtoupper',
+                    $this->reverse(...),
+                    fn($value) => lcfirst((string) $value),
+                ],
+                'Number' => [
+                    'strrev',
+                    fn($value) => $value * 2,
+                ],
+            ]
         );
+        $csv->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("Id,Name,Number\n1,oOF,642\n2,rAB,1308\n3,zAB,1974\n", $this->getFileContents());
     }
 
-    /**
-     * Test that we detect failure to create the output file.
-     */
-    public function testCreateWriteFail(): void
+    public function testCreateFileFails(): void
     {
         $this->expectException(RuntimeException::class);
-        $csv = new Writer(['file' => 'php://foo']);
-        // @phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-        @$csv->write([1, 2, 3, 4, 5]);
+        $this->expectExceptionMessageMatches('/failed to create file/i');
+        (new Writer('php://foo'))->write([]);
     }
 
-    /**
-     * Test that we can explicitly specify column names.
-     */
-    public function testExplicitColumns(): void
+    public function testDelimiterCharacter(): void
     {
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'columns' => ['Id', 'Name', 'Email'],
-            'strict' => false,
-        ]);
-        $csv->writeFromIterator([
-            ['Id' => 1, 'Name' => 'foo'],
-            ['Name' => 'baz', 'Email' => 'foo@bar.com'],
-        ]);
-        $this->assertSame(
-            <<<'EOS'
-            Id,Name,Email
-            1,foo,
-            ,baz,foo@bar.com
-
-            EOS,
-            file_get_contents($this->getTempFile())
-        );
+        $csv = new Writer(file: $this->getFile(), delimiterCharacter: '|');
+        $csv->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("Id|Name|Number\n1|foo|123\n2|bar|456\n3|baz|789\n", $this->getFileContents());
     }
 
-    /**
-     * Test that we get a proper line count.
-     */
-    public function testGetLineNumber(): void
+    public function testExplicitColumnNames(): void
     {
-        $csv = new Writer(['file' => $this->getTempFile()]);
+        $csv = new Writer(file: $this->getFile(), columnNames: ['Number', 'Id']);
+        $csv->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("Number,Id\n123,1\n456,2\n789,3\n", $this->getFileContents());
+    }
+
+    public function testGetLineNumberWithHeader(): void
+    {
+        $csv = new Writer(file: $this->getFile(), hasHeader: true);
         $this->assertSame(0, $csv->getLineNumber());
-        $csv->writeFromIterator([
-            ['Id' => 1, 'Name' => 'foo'],
-            ['Id' => 2, 'Name' => 'bar'],
-            ['Id' => 3, 'Name' => 'baz'],
-        ]);
+        $csv->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame(4, $csv->getLineNumber());
+    }
+
+    public function testGetLineNumberWithoutHeader(): void
+    {
+        $csv = new Writer(file: $this->getFile(), hasHeader: false);
+        $this->assertSame(0, $csv->getLineNumber());
+        $csv->writeFrom(static::DEFAULT_DATA);
         $this->assertSame(3, $csv->getLineNumber());
     }
 
-    /**
-     * Test that we correctly rearrange out-of-order columns.
-     */
     public function testOutOfOrderColumns(): void
     {
-        $csv = new Writer(['file' => $this->getTempFile()]);
-        $csv->writeFromIterator([
-            ['Id' => 1, 'Name' => 'foo'],
-            ['Name' => 'bar', 'Id' => 2],
-            ['Id' => 3, 'Name' => 'baz'],
+        $csv = new Writer($this->getFile());
+        $csv->writeFrom([
+            ['Id' => 1, 'Name' => 'foo', 'Number' => 123],
+            ['Number' => 456, 'Name' => 'bar', 'Id' => 2],
+            ['Id' => 3, 'Name' => 'baz', 'Number' => 789],
         ]);
-        $this->assertSame(
-            <<<'EOS'
-            Id,Name
-            1,foo
-            2,bar
-            3,baz
-
-            EOS,
-            file_get_contents($this->getTempFile())
-        );
+        $this->assertSame("Id,Name,Number\n1,foo,123\n2,bar,456\n3,baz,789\n", $this->getFileContents());
     }
 
-    /**
-     * Test that the write() return value is correct.
-     */
-    public function testReturnValue(): void
-    {
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'header' => false,
-        ]);
-        $this->assertSame(20, $csv->write([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
-    }
-
-    /**
-     * Test that we can skip columns.
-     */
     public function testSkippedColumns(): void
     {
-        $csv = new Writer(['file' => $this->getTempFile()]);
-        $csv->writeFromIterator([
+        $csv = new Writer($this->getFile());
+        $csv->writeFrom([
             ['one' => 1, 'two' => 2,'three' => 3],
             ['two' => 2, 'three' => 3],
             ['one' => 1, 'three' => 3],
@@ -300,176 +194,80 @@ class WriterTest extends TestCase
             ['two' => 2],
             ['three' => 3],
         ]);
-        $this->assertSame(
-            <<<'EOS'
-            one,two,three
-            1,2,3
-            ,2,3
-            1,,3
-            1,2,
-            1,,
-            ,2,
-            ,,3
-
-            EOS,
-            file_get_contents($this->getTempFile())
-        );
+        $this->assertSame("one,two,three\n1,2,3\n,2,3\n1,,3\n1,2,\n1,,\n,2,\n,,3\n", $this->getFileContents());
     }
 
-    /**
-     * Test that strict mode off works.
-     */
-    public function testUnknownColumnLenient(): void
+    public function testUnknownColumnAllow(): void
     {
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'strict' => false,
+        $csv = new Writer(file: $this->getFile(), allowUnknownColumns: true);
+        $csv->writeFrom([
+            ['Id' => 1, 'Name' => 'foo', 'Number' => 123],
+            ['Id' => 2, 'Name' => 'bar', 'Number' => 456],
+            ['Id' => 3, 'Name' => 'baz', 'Number' => 789, 'Extra' => 'foo'],
         ]);
-        $csv->writeFromIterator([
-            ['foo' => 1, 'bar' => 2],
-            ['foo' => 3, 'bar' => 4],
-            ['foo' => 5, 'bar' => 6, 'baz' => 7],
-        ]);
-        $this->assertSame(
-            <<<'EOS'
-            foo,bar
-            1,2
-            3,4
-            5,6
-
-            EOS,
-            file_get_contents($this->getTempFile())
-        );
+        $this->assertSame("Id,Name,Number\n1,foo,123\n2,bar,456\n3,baz,789\n", $this->getFileContents());
     }
 
-    /**
-     * Test that strict mode on works.
-     */
-    public function testUnknownColumnStrict(): void
+    public function testUnknownColumnDisallow(): void
     {
+        $csv = new Writer(file: $this->getFile(), allowUnknownColumns: false);
         $this->expectException(RuntimeException::class);
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'strict' => true,
-        ]);
-        $csv->writeFromIterator([
-            ['foo' => 1, 'bar' => 2],
-            ['foo' => 3, 'bar' => 4],
-            ['foo' => 5, 'bar' => 6, 'baz' => 7],
+        $this->expectExceptionMessageMatches('/unknown column detected/i');
+        $csv->writeFrom([
+            ['Id' => 1, 'Name' => 'foo', 'Number' => 123],
+            ['Id' => 2, 'Name' => 'bar', 'Number' => 456],
+            ['Id' => 3, 'Name' => 'baz', 'Number' => 789, 'Extra' => 'foo'],
         ]);
     }
 
-    /**
-     * Test that we detect failure to write to the output file.
-     */
-    public function testWriteFail(): void
+    public function testWriteFromArray(): void
     {
+        (new Writer($this->getFile()))->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("Id,Name,Number\n1,foo,123\n2,bar,456\n3,baz,789\n", $this->getFileContents());
+    }
+
+    public function testWriteFromIterator(): void
+    {
+        (new Writer($this->getFile()))->writeFrom(new ArrayIterator(static::DEFAULT_DATA));
+        $this->assertSame("Id,Name,Number\n1,foo,123\n2,bar,456\n3,baz,789\n", $this->getFileContents());
+    }
+
+    public function testWriteRowFails(): void
+    {
+        $csv = new Writer($this->getFile());
+        $csv->write([1, 2, 3]);
+        chmod($this->getFile(), 0000);
         $this->expectException(RuntimeException::class);
-        vfsStream::setQuota(1);
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'header' => false,
-        ]);
-        $csv->write([1, 2, 3, 4, 5]);
-        vfsStream::setQuota(0);
+        $this->expectExceptionMessageMatches('/failed to write to file/i');
+        $csv->write([1, 2, 3]);
     }
 
-    /**
-     * Test that we can iterate over an array.
-     */
-    public function testWriteFromIteratorWithArray(): void
+    public function testWriteToExistingFileWithAppend(): void
     {
-        $csv = new Writer(['file' => $this->getTempFile()]);
-        $this->assertSame(
-            3,
-            $csv->writeFromIterator([
-                ['foo' => 1, 'bar' => 2, 'baz' => 3],
-                ['foo' => 4, 'bar' => 5, 'baz' => 6],
-                ['foo' => 7, 'bar' => 8, 'baz' => 9],
-            ])
-        );
-        $this->assertSame(
-            <<<'EOS'
-            foo,bar,baz
-            1,2,3
-            4,5,6
-            7,8,9
-
-            EOS,
-            file_get_contents($this->getTempFile())
-        );
+        file_put_contents($this->getFile(), "Id,Name,Number\n1,foo,123\n2,bar,456\n");
+        (new Writer(file: $this->getFile(), appendToExistingFile: true))
+            ->write(['Id' => 3, 'Name' => 'baz', 'Number' => 789]);
+        $this->assertSame("Id,Name,Number\n1,foo,123\n2,bar,456\n3,baz,789\n", $this->getFileContents());
     }
 
-    /**
-     * Test that we can iterate over an iterator.
-     */
-    public function testWriteFromIteratorWithTraversable(): void
+    public function testWriteToExistingFileWithoutAppend(): void
     {
-        $csv = new Writer(['file' => $this->getTempFile()]);
-        $this->assertSame(
-            3,
-            $csv->writeFromIterator(
-                new ArrayIterator([
-                    ['foo' => 1, 'bar' => 2, 'baz' => 3],
-                    ['foo' => 4, 'bar' => 5, 'baz' => 6],
-                    ['foo' => 7, 'bar' => 8, 'baz' => 9],
-                ])
-            )
-        );
-        $this->assertSame(
-            <<<'EOS'
-            foo,bar,baz
-            1,2,3
-            4,5,6
-            7,8,9
-
-            EOS,
-            file_get_contents($this->getTempFile())
-        );
+        file_put_contents($this->getFile(), "Id,Name,Number\n1,foo,123\n2,bar,456\n");
+        (new Writer(file: $this->getFile(), appendToExistingFile: false))
+            ->write(['Id' => 1, 'Name' => 'foo', 'Number' => 123]);
+        $this->assertSame("Id,Name,Number\n1,foo,123\n", $this->getFileContents());
     }
 
-    /**
-     * Test that we create the header correctly.
-     */
-    public function testWriteHeader(): void
+    public function testWriteWithHeader(): void
     {
-        $csv = new Writer(['file' => $this->getTempFile()]);
-        $csv->writeFromIterator([
-            ['Id' => 1, 'Name' => 'foo'],
-            ['Id' => 2, 'Name' => 'bar'],
-            ['Id' => 3, 'Name' => 'baz'],
-        ]);
-        $this->assertSame(
-            <<<'EOS'
-            Id,Name
-            1,foo
-            2,bar
-            3,baz
-
-            EOS,
-            file_get_contents($this->getTempFile())
-        );
+        (new Writer(file: $this->getFile(), hasHeader: true))->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("Id,Name,Number\n1,foo,123\n2,bar,456\n3,baz,789\n", $this->getFileContents());
     }
 
-    /**
-     * Test that we don't create a header row when specified.
-     */
-    public function testWriteNoHeader(): void
+    public function testWriteWithoutHeader(): void
     {
-        $csv = new Writer([
-            'file' => $this->getTempFile(),
-            'header' => false,
-        ]);
-        $csv->write([1, 2, 3, 4, 5]);
-        $csv->write([6, 7, 8, 9, 10]);
-        $this->assertSame(
-            <<<'EOS'
-            1,2,3,4,5
-            6,7,8,9,10
-
-            EOS,
-            file_get_contents($this->getTempFile())
-        );
+        (new Writer(file: $this->getFile(), hasHeader: false))->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("1,foo,123\n2,bar,456\n3,baz,789\n", $this->getFileContents());
     }
 
 }

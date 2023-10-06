@@ -11,7 +11,8 @@
 
 namespace Ork\Csv;
 
-use Ork\Core\ConfigurableTrait;
+use RuntimeException;
+use UnexpectedValueException;
 
 /**
  * CSV abstract.
@@ -19,39 +20,43 @@ use Ork\Core\ConfigurableTrait;
 abstract class AbstractCsv
 {
 
-    use ConfigurableTrait;
+    protected array $callbacks;
+
+    protected array $columnNames;
+
+    protected string $delimiterCharacter;
+
+    protected string $escapeCharacter;
+
+    protected int $lineNumber = 0;
+
+    protected string $quoteCharacter;
 
     /**
-     * Contains the line count.
+     * Apply callbacks to a row.
      *
-     * @var int
-     */
-    protected int $line = 0;
-
-    /**
-     * Apply callbacks.
+     * @param array $row The callbacks to apply.
      *
-     * @param array $row The row to process.
-     *
-     * @return array The processed row.
+     * @return array The updated row.
      */
     protected function applyCallbacks(array $row): array
     {
-        foreach ($this->getConfig('callbacks') as $column => $callbacks) {
+        foreach ($this->callbacks as $column => $callbacks) {
 
-            // Interpret as a regex and apply to all matching columns.
+            // If the column name of the callback starts with a slash, we'll
+            // interpret it as a regex and apply the callback to all the row
+            // columns that match the pattern.
             if (str_starts_with($column, '/') === true) {
-                foreach (array_keys($row) as $name) {
-                    if (preg_match($column, (string) $name) === 1) {
+                foreach (array_keys($row) as $key) {
+                    if (preg_match($column, $key) === 1) {
                         foreach ((array) $callbacks as $callback) {
-                            $row[$name] = call_user_func($callback, $row[$name]);
+                            $row[$key] = call_user_func($callback, $row[$key]);
                         }
                     }
                 }
-                continue;
             }
 
-            // Apply to one explicitly named column.
+            // Apply this callback to one explicitly named (or indexed) column.
             if (array_key_exists($column, $row) === true) {
                 foreach ((array) $callbacks as $callback) {
                     $row[$column] = call_user_func($callback, $row[$column]);
@@ -63,13 +68,53 @@ abstract class AbstractCsv
     }
 
     /**
-     * Get the current line number.
+     * Get the line number that has most recently been processed.
      *
-     * @return int The current line number.
+     * @return int The line number that has most recently been processed.
      */
     public function getLineNumber(): int
     {
-        return $this->line;
+        return $this->lineNumber;
+    }
+
+    /**
+     * Validate that column names are unique.
+     *
+     * @throws RuntimeException If column names are not unique.
+     */
+    protected function validateColumnNames(array $columnNames): array
+    {
+        $columnNames = array_map(fn(string $columnName): string => trim($columnName), $columnNames);
+        if (count($columnNames) !== count(array_unique($columnNames))) {
+            throw new RuntimeException('Column names are not unique: ' . join(', ', $columnNames));
+        }
+        return $columnNames;
+    }
+
+    /**
+     * Validate the constructor parameters.
+     *
+     * @throws UnexpectedValueException If an invalid parameters are provided.
+     */
+    protected function validateParameters(): void
+    {
+        foreach ($this->callbacks as $callbacks) {
+            foreach ((array) $callbacks as $callback) {
+                if (is_callable($callback) === false) {
+                    throw new UnexpectedValueException('Callback is not callable: ' . $callback);
+                }
+            }
+        }
+        $this->columnNames = $this->validateColumnNames($this->columnNames);
+        if (strlen($this->delimiterCharacter) > 1) {
+            throw new UnexpectedValueException('delimiterCharacter must be a single character');
+        }
+        if (strlen($this->escapeCharacter) > 1) {
+            throw new UnexpectedValueException('escapeCharacter must be a single character');
+        }
+        if (strlen($this->quoteCharacter) > 1) {
+            throw new UnexpectedValueException('quoteCharacter must be a single character');
+        }
     }
 
 }

@@ -1,7 +1,5 @@
 parameters:
-    checkGenericClassInNonGenericObjectType: false
-    checkMissingIterableValueType: false
-    level: 8
+    level: 5
     paths:
         - src
         - tests

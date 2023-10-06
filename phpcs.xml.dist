@@ -1,12 +1,20 @@
 <?xml version="1.0"?>
 <ruleset name="Ork CSV">
-    <rule ref="Ork"/>
-    <rule ref="PHPCompatibility"/>
-    <rule ref="Squiz.PHP.Heredoc.NotAllowed">
-        <exclude-pattern>tests/*</exclude-pattern>
+    <rule ref="Ork">
+        <!--
+            PHPCS thinks this construct is always terminal:
+                $array[$index] ?? throw new Exception();
+
+            We'll ignore it until the bug is fixed in v3.8.0.
+
+            @see https://github.com/squizlabs/PHP_CodeSniffer/pull/3777
+        -->
+        <exclude name="Squiz.PHP.NonExecutableCode.Unreachable"/>
+        <exclude name="Ork.Functions.FunctionCallSignature.Indent"/>
     </rule>
-    <config name="php_version" value="80028"/>
-    <config name="testVersion" value="8.0-"/>
+    <rule ref="PHPCompatibility"/>
+    <config name="php_version" value="80124"/>
+    <config name="testVersion" value="8.1-"/>
     <file>src</file>
     <file>tests</file>
 </ruleset>

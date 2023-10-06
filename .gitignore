@@ -1,7 +1,7 @@
 .coverage/
 .junit.xml
 .metrics/
-.phpunit.result.cache
+.phpunit.cache
 phpcs.xml
 phpstan.neon
 phpunit.xml
