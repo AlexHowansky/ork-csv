@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: install PHP
       uses: shivammathur/setup-php@v2
@@ -25,13 +25,13 @@ jobs:
       run: composer validate
 
     - name: composer install
-      run: composer install --prefer-dist --no-progress --no-suggest
+      run: composer install
 
     - name: PHPUnit
       run: composer coverage -- --coverage-clover coverage.xml
 
     - name: save coverage.xml
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: coverage
         path: coverage.xml
@@ -45,10 +45,10 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: download
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
 
       - name: upload
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
