@@ -3,7 +3,7 @@
 ## 2.0.0
 
 * Removed support for PHP 8.0.
-* Migrated `Reader` and `Writer` configuration paramters from
+* Migrated `Reader` and `Writer` configuration parameters from
   `\Ork\Core\ConfigurableTrait` to named constructor parameters.
 * The `$column` parameter of the `Reader::toArray()` method has been removed.
   Specification of a custom array key is now accomplished via the `keyByColumn`
