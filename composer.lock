@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "82a28097129e4a61f7f880f903ba206e",
+    "content-hash": "a6be5220e8838cd6ebd883caa9346f34",
     "packages": [],
     "packages-dev": [
         {
@@ -253,21 +253,21 @@
         },
         {
             "name": "ork/phpcs",
-            "version": "2.8.2",
+            "version": "2.8.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/AlexHowansky/ork-phpcs.git",
-                "reference": "0cd72902f1bc64e91758d5618217cdabcdcf720a"
+                "reference": "bbda8303cc7ec888c6d579affd46b5b03f86b5ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/AlexHowansky/ork-phpcs/zipball/0cd72902f1bc64e91758d5618217cdabcdcf720a",
-                "reference": "0cd72902f1bc64e91758d5618217cdabcdcf720a",
+                "url": "https://api.github.com/repos/AlexHowansky/ork-phpcs/zipball/bbda8303cc7ec888c6d579affd46b5b03f86b5ae",
+                "reference": "bbda8303cc7ec888c6d579affd46b5b03f86b5ae",
                 "shasum": ""
             },
             "require": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
-                "squizlabs/php_codesniffer": "^3.7.2"
+                "squizlabs/php_codesniffer": "^3.9.1"
             },
             "type": "phpcodesniffer-standard",
             "notification-url": "https://packagist.org/downloads/",
@@ -289,9 +289,9 @@
             ],
             "support": {
                 "issues": "https://github.com/AlexHowansky/ork-phpcs/issues",
-                "source": "https://github.com/AlexHowansky/ork-phpcs/tree/2.8.2"
+                "source": "https://github.com/AlexHowansky/ork-phpcs/tree/2.8.3"
             },
-            "time": "2023-07-28T20:33:29+00:00"
+            "time": "2024-04-18T16:38:13+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -2729,16 +2729,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.9.0",
+            "version": "3.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "d63cee4890a8afaf86a22e51ad4d97c91dd4579b"
+                "reference": "267a4405fff1d9c847134db3a3c92f1ab7f77909"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/d63cee4890a8afaf86a22e51ad4d97c91dd4579b",
-                "reference": "d63cee4890a8afaf86a22e51ad4d97c91dd4579b",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/267a4405fff1d9c847134db3a3c92f1ab7f77909",
+                "reference": "267a4405fff1d9c847134db3a3c92f1ab7f77909",
                 "shasum": ""
             },
             "require": {
@@ -2805,7 +2805,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-02-16T15:06:51+00:00"
+            "time": "2024-03-31T21:03:09+00:00"
         },
         {
             "name": "theseer/tokenizer",

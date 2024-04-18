@@ -17,7 +17,7 @@
     },
     "require-dev": {
         "mikey179/vfsstream": "^1.6.11",
-        "ork/phpcs": "^2.8.2",
+        "ork/phpcs": "^2.8.3",
         "phpcompatibility/php-compatibility": "^9.3.5",
         "phpmetrics/phpmetrics": "^2.8.2",
         "phpstan/phpstan": "^1.10.59",
