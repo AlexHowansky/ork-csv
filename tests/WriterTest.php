@@ -258,6 +258,12 @@ class WriterTest extends TestCase
         $this->assertSame("Id,Name,Number\n1,foo,123\n", $this->getFileContents());
     }
 
+    public function testWriteToFileHandle(): void
+    {
+        (new Writer(fopen($this->getFile(), 'w')))->writeFrom(static::DEFAULT_DATA);
+        $this->assertSame("Id,Name,Number\n1,foo,123\n2,bar,456\n3,baz,789\n", $this->getFileContents());
+    }
+
     public function testWriteWithHeader(): void
     {
         (new Writer(file: $this->getFile(), hasHeader: true))->writeFrom(static::DEFAULT_DATA);

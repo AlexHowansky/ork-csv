@@ -25,7 +25,7 @@ class Writer extends AbstractCsv
     /**
      * Constructor.
      *
-     * @param string $file The file to process.
+     * @param string|resource $file The file to process.
      * @param bool $hasHeader True if the file has a header row with column names.
      * @param array $columnNames An array of column names to use if the file does not include a header row.
      * @param array $callbacks Callbacks to apply to columns as they are read.
@@ -38,7 +38,7 @@ class Writer extends AbstractCsv
      * @throws UnexpectedValueException If an invalid parameters are provided.
      */
     public function __construct(
-        protected string $file = 'php://stdout',
+        protected mixed $file = 'php://stdout',
         protected bool $hasHeader = true,
         protected array $columnNames = [],
         protected array $callbacks = [],
@@ -70,6 +70,9 @@ class Writer extends AbstractCsv
      */
     protected function getFileHandle()
     {
+        if (is_resource($this->file) === true) {
+            return $this->file;
+        }
         if (isset($this->fileHandle) === false) {
             // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
             $this->fileHandle = @fopen($this->file, $this->appendToExistingFile === true ? 'a' : 'w');

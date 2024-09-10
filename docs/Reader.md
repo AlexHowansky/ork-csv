@@ -97,8 +97,9 @@ The `\Ork\Csv\Reader` constructor takes the following optional paramters:
 
 Default: `php://stdin`
 
-The file to read from. This may be any value that PHP treats as a file
-reference, including `php://` specials and URLs.
+The file to read from. This may be a string containing any value that PHP treats
+as a file reference (including `php://` specials and URLs) or an open file
+handle.
 
 ### `hasHeader`
 

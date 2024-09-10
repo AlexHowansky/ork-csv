@@ -31,7 +31,7 @@ class Reader extends AbstractCsv implements IteratorAggregate
     /**
      * Constructor.
      *
-     * @param string $file The file to process.
+     * @param string|resource $file The file to process.
      * @param bool $hasHeader True if the file has a header row with column names.
      * @param array $columnNames An array of column names to use if the file does not include a header row.
      * @param array $callbacks Callbacks to apply to columns as they are read.
@@ -42,7 +42,7 @@ class Reader extends AbstractCsv implements IteratorAggregate
      * @param string $escapeCharacter The CSV escape character to use.
      */
     public function __construct(
-        protected string $file = 'php://stdin',
+        protected mixed $file = 'php://stdin',
         protected bool $hasHeader = true,
         protected array $columnNames = [],
         protected array $callbacks = [],
@@ -96,7 +96,7 @@ class Reader extends AbstractCsv implements IteratorAggregate
     public function getIterator(): Generator
     {
         // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-        $csv = @fopen($this->file, 'r');
+        $csv = is_resource($this->file) === true ? $this->file : @fopen($this->file, 'r');
         if ($csv === false) {
             throw new RuntimeException('Failed to open file: ' . $this->file);
         }

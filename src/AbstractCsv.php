@@ -11,6 +11,7 @@
 
 namespace Ork\Csv;
 
+use PHPUnit\TextUI\Output\Default\UnexpectedOutputPrinter;
 use RuntimeException;
 use UnexpectedValueException;
 
@@ -27,6 +28,8 @@ abstract class AbstractCsv
     protected string $delimiterCharacter;
 
     protected string $escapeCharacter;
+
+    protected mixed $file;
 
     protected int $lineNumber = 0;
 
@@ -98,6 +101,9 @@ abstract class AbstractCsv
      */
     protected function validateParameters(): void
     {
+        if (is_string($this->file) === false && is_resource($this->file) === false) {
+            throw new UnexpectedValueException('file must be a string or file handle');
+        }
         foreach ($this->callbacks as $callbacks) {
             foreach ((array) $callbacks as $callback) {
                 if (is_callable($callback) === false) {

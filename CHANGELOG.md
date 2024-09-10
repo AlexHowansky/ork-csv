@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.1.0
+
+* Added the ability to specify a file handle for the `file` parameter.
+
 ## 2.0.0
 
 * Removed support for PHP 8.0.

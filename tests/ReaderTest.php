@@ -221,6 +221,21 @@ class ReaderTest extends TestCase
     }
 
     /**
+     * Test that we can read from an open file handle.
+     */
+    public function testFileHandle(): void
+    {
+        $this->assertEquals(
+            [
+                ['Id' => 1, 'Name' => 'foo', 'Number' => 123],
+                ['Id' => 2, 'Name' => 'bar', 'Number' => 456],
+                ['Id' => 3, 'Name' => 'baz', 'Number' => 789],
+            ],
+            (new Reader(fopen($this->makeFile(), 'r')))->toArray()
+        );
+    }
+
+    /**
      * Test that we can't read a file with restrictive permissions.
      */
     public function testFileWithBadPermissions(): void
@@ -357,6 +372,14 @@ class ReaderTest extends TestCase
         $csv = new Reader($file);
         $this->assertEquals([1, 2, 3], iterator_to_array($csv->getColumn('Id')));
         $this->assertEquals(['foo', 'bar', 'baz'], iterator_to_array($csv->getColumn('Name')));
+    }
+
+    public function testInvalidFileType(): void
+    {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessageMatches('/file must be a string or file handle/i');
+        // @phpstan-ignore-next-line
+        new Reader([]);
     }
 
     public function testKeyByColumn(): void
