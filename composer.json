@@ -21,7 +21,7 @@
         "phpcompatibility/php-compatibility": "^9.3.5",
         "phpmetrics/phpmetrics": "^2.8.2",
         "phpstan/phpstan": "^1.12.3",
-        "phpunit/phpunit": "^10.5.33",
+        "phpunit/phpunit": "^10.5.34",
         "rector/rector": "^1.2.5",
         "roave/security-advisories": "dev-master"
     },

@@ -102,7 +102,9 @@ The `\Ork\Csv\Writer` constructor takes the following optional paramters:
 
 Default: `php://stdout`
 
-The file to write to.
+The file to write to. This may be a string containing any value that PHP treats
+as a file reference (including `php://` specials and writable stream wrappers)
+or an open file handle.
 
 ### `hasHeader`
 
