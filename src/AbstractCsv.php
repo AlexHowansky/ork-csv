@@ -11,7 +11,6 @@
 
 namespace Ork\Csv;
 
-use PHPUnit\TextUI\Output\Default\UnexpectedOutputPrinter;
 use RuntimeException;
 use UnexpectedValueException;
 
