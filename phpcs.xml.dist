@@ -1,15 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="Ork CSV">
     <rule ref="Ork">
-        <!--
-            PHPCS thinks this construct is always terminal:
-                $array[$index] ?? throw new Exception();
-
-            We'll ignore it until the bug is fixed in v3.8.0.
-
-            @see https://github.com/squizlabs/PHP_CodeSniffer/pull/3777
-        -->
-        <exclude name="Squiz.PHP.NonExecutableCode.Unreachable"/>
         <exclude name="Ork.Functions.FunctionCallSignature.Indent"/>
     </rule>
     <rule ref="PHPCompatibility"/>
