@@ -157,7 +157,11 @@ class Reader extends AbstractCsv implements IteratorAggregate
         if (count($this->columnNames) !== count($row)) {
             throw new RuntimeException('Column mismatch on line: ' . $this->lineNumber);
         }
-        return array_combine($this->columnNames, $row);
+        return array_filter(
+            array_combine($this->columnNames, $row),
+            fn(string $key): bool => empty($key) === false,
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     /**

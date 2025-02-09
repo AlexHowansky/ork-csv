@@ -523,6 +523,40 @@ class ReaderTest extends TestCase
         new Reader(columnNames: ['Id', 'Name', 'Number', ' Id']);
     }
 
+    public function testNullColumnsHeader(): void
+    {
+        $csv = new Reader(
+            file: $this->makeFile(),
+            hasHeader: true,
+            columnNames: ['Id', null, ''],
+        );
+        $this->assertEquals(
+            [
+                ['Id' => 1],
+                ['Id' => 2],
+                ['Id' => 3],
+            ],
+            $csv->toArray()
+        );
+    }
+
+    public function testNullColumnsNoHeader(): void
+    {
+        $csv = new Reader(
+            file: $this->makeFile("1,foo,123\n2,bar,456\n3,baz,789\n"),
+            hasHeader: false,
+            columnNames: ['Id', null, ''],
+        );
+        $this->assertEquals(
+            [
+                ['Id' => 1],
+                ['Id' => 2],
+                ['Id' => 3],
+            ],
+            $csv->toArray()
+        );
+    }
+
     /**
      * Test that we can override the column names of a file with a header row.
      */

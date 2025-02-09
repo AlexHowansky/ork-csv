@@ -145,6 +145,38 @@ Array
 )
 ```
 
+If not all columns are desired in the output, they may be skipped by providing
+empty column names for their position.
+
+```csv
+1,foo,large
+2,bar,small
+```
+
+```php
+$csv = new \Ork\Csv\Reader(
+    file: '/path/to/file.csv',
+    hasHeader: false,
+    columnNames: ['One', null, 'Three']
+);
+foreach ($csv as $row) {
+    print_r($row);
+}
+```
+
+```text
+Array
+(
+    [One] => 1
+    [Three] => large
+)
+Array
+(
+    [One] => 2
+    [Three] => small
+)
+```
+
 Column names may also be overridden for files that have a header line. If
 `hasHeader` is `true` and `columnNames` is empty (the default), the values from
 the header line are used as column names. If `hasHeader` is `true` and

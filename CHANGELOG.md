@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.2.0
+
+* Added the ability for `Reader` to skip columns by specifying an empty column
+  name.
+
 ## 2.1.0
 
 * Added the ability to specify a file handle for the `file` parameter.

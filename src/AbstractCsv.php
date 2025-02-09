@@ -86,8 +86,9 @@ abstract class AbstractCsv
      */
     protected function validateColumnNames(array $columnNames): array
     {
-        $columnNames = array_map(fn(string $columnName): string => trim($columnName), $columnNames);
-        if (count($columnNames) !== count(array_unique($columnNames))) {
+        $columnNames = array_map(fn(?string $columnName): string => trim((string) $columnName), $columnNames);
+        $filtered = array_filter($columnNames);
+        if (count($filtered) !== count(array_unique($filtered))) {
             throw new RuntimeException('Column names are not unique: ' . join(', ', $columnNames));
         }
         return $columnNames;
