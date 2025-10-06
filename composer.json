@@ -19,10 +19,10 @@
         "mikey179/vfsstream": "^1.6.12",
         "ork/phpcs": "^2.10.0",
         "phpcompatibility/php-compatibility": "^9.3.5",
-        "phpmetrics/phpmetrics": "^2.8.2",
-        "phpstan/phpstan": "^2.1.14",
-        "phpunit/phpunit": "^10.5.46",
-        "rector/rector": "^2.0.16",
+        "phpmetrics/phpmetrics": "^2.9.1",
+        "phpstan/phpstan": "^2.1.30",
+        "phpunit/phpunit": "^10.5.58",
+        "rector/rector": "^2.2.0",
         "roave/security-advisories": "dev-master"
     },
     "autoload": {

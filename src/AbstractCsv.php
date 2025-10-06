@@ -48,9 +48,9 @@ abstract class AbstractCsv
             // If the column name of the callback starts with a slash, we'll
             // interpret it as a regex and apply the callback to all the row
             // columns that match the pattern.
-            if (str_starts_with($column, '/') === true) {
+            if (str_starts_with((string) $column, '/') === true) {
                 foreach (array_keys($row) as $key) {
-                    if (preg_match($column, $key) === 1) {
+                    if (preg_match($column, (string) $key) === 1) {
                         foreach ((array) $callbacks as $callback) {
                             $row[$key] = call_user_func($callback, $row[$key]);
                         }
