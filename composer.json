@@ -20,9 +20,9 @@
         "ork/phpcs": "^3.0.0",
         "phpcompatibility/php-compatibility": "^10.0.0@dev",
         "phpmetrics/phpmetrics": "^2.9.1",
-        "phpstan/phpstan": "^2.1.31",
-        "phpunit/phpunit": "^10.5.58",
-        "rector/rector": "^2.2.7",
+        "phpstan/phpstan": "^2.1.32",
+        "phpunit/phpunit": "^10.5.59",
+        "rector/rector": "^2.2.11",
         "roave/security-advisories": "dev-master"
     },
     "autoload": {
