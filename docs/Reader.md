@@ -17,6 +17,7 @@
 * [Using Only a Single Column](#using-only-a-single-column)
 * [Line Number](#line-number)
 * [Array Casting](#array-casting)
+* [Filtering Rows](#filtering-rows)
 
 ## Usage
 
@@ -310,8 +311,8 @@ all columns, specify a pattern that matches all your field names, like `/./`.
 
 ```csv
 ID,Name,Date
- 1 , foo , 2020-01-01T01:02:03+00:00
- 2 , bar , 2021-02-02T02:03:04+00:00
+ 1, foo , 2020-01-01T01:02:03+00:00
+ 2, bar , 2021-02-02T02:03:04+00:00
 ```
 
 ```php
@@ -638,4 +639,28 @@ Array
         )
 
 )
+```
+
+## Filtering Rows
+
+Default behavior of the iterator is to include every row in the file.
+
+```php
+$csv = new \Ork\Csv\Reader('/path/to/file.csv');
+foreach ($csv as $row) {
+    // Every row is included here.
+}
+```
+
+Alternatively, rows may be filtered by passing a callable to the `getWhere()`
+method. The callable should take an array (the row) as an argument and return a
+boolean. Only rows that evaluate to true will be yielded. This is functionally
+equivalent to `array_filter()` but retains the one-at-a-time nature of the
+iterator.
+
+```php
+$csv = new \Ork\Csv\Reader('/path/to/file.csv');
+foreach ($csv->getWhere(fn($row) => $row['value'] > 100) as $row) {
+    // Only rows with value > 100 are included here.
+}
 ```

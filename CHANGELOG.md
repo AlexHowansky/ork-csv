@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.3.0
+
+* Added the `Reader::getWhere()` method to allow row filtering.
+
 ## 2.2.0
 
 * Added the ability for `Reader` to skip columns by specifying an empty column

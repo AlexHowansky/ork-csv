@@ -145,6 +145,22 @@ class Reader extends AbstractCsv implements IteratorAggregate
     }
 
     /**
+     * Get rows that match a filter.
+     *
+     * @param callable $filter A callable that takes a row as input and returns true to include the row.
+     *
+     * @return Generator An iterator over the matching rows.
+     */
+    public function getWhere(callable $filter): Generator
+    {
+        foreach ($this as $row) {
+            if (call_user_func($filter, $row) === true) {
+                yield $row;
+            }
+        }
+    }
+
+    /**
      * Map the indexed input row to an associative array with column names.
      *
      * @throws RuntimeException If the number of columns in a row doesn't match the expected number.

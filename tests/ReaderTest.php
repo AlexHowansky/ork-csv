@@ -374,6 +374,23 @@ class ReaderTest extends TestCase
         $this->assertEquals(['foo', 'bar', 'baz'], iterator_to_array($csv->getColumn('Name')));
     }
 
+    /**
+     * Test that we can filter rows via a callback.
+     */
+    public function testGetWhere(): void
+    {
+        $csv = new Reader(
+            callbacks: ['Id' => 'intval'],
+            file: $this->makeFile()
+        );
+        $this->assertEquals(
+            [
+                ['Id' => 2, 'Name' => 'bar', 'Number' => 456],
+            ],
+            iterator_to_array($csv->getWhere(fn(array $row): bool => $row['Id'] === 2))
+        );
+    }
+
     public function testInvalidFileType(): void
     {
         $this->expectException(UnexpectedValueException::class);
