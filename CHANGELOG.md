@@ -2,6 +2,7 @@
 
 ## 2.3.0
 
+* Updated to require PHP 8.2 and support PHP 8.5.
 * Added the `Reader::getWhere()` method to allow row filtering.
 
 ## 2.2.0

@@ -13,16 +13,16 @@
         }
     ],
     "require": {
-        "php": "^8.1"
+        "php": "^8.2"
     },
     "require-dev": {
         "mikey179/vfsstream": "^1.6.12",
         "ork/phpcs": "^3.0.0",
         "phpcompatibility/php-compatibility": "^10.0.0@dev",
         "phpmetrics/phpmetrics": "^2.9.1",
-        "phpstan/phpstan": "^2.1.32",
-        "phpunit/phpunit": "^10.5.59",
-        "rector/rector": "^2.2.11",
+        "phpstan/phpstan": "^2.1.33",
+        "phpunit/phpunit": "^11.5.46",
+        "rector/rector": "^2.2.14",
         "roave/security-advisories": "dev-master"
     },
     "autoload": {

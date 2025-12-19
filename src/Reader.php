@@ -103,7 +103,7 @@ class Reader extends AbstractCsv implements IteratorAggregate
         $this->lineNumber = 0;
         while (true) {
             $fields = fgetcsv($csv, 0, $this->delimiterCharacter, $this->quoteCharacter, $this->escapeCharacter);
-            if (is_array($fields) === false) {
+            if ($fields === false) {
                 break;
             }
             if ($this->lineNumber++ === 0 && $this->hasHeader === true) {
