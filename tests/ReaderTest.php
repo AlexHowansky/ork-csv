@@ -257,6 +257,16 @@ class ReaderTest extends TestCase
     }
 
     /**
+     * Test that we can iterate twice.
+     */
+    public function testFileRewind(): void
+    {
+        $file = $this->makeFile();
+        $csv = new Reader(file: $file, keyByColumn: 'Name', detectDuplicateKeys: true);
+        $this->assertSame($csv->toArray(), $csv->toArray());
+    }
+
+    /**
      * Test that we can't read a file with restrictive permissions.
      */
     public function testFileWithBadPermissions(): void
@@ -455,7 +465,7 @@ class ReaderTest extends TestCase
         $file = $this->makeFile("Id,Name,Number\n1,foo,123\n2,bar,456\n3,foo,789\n");
         $csv = new Reader(file: $file, keyByColumn: 'Name', detectDuplicateKeys: true);
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageMatches('/duplicate key detected/i');
+        $this->expectExceptionMessageMatches('/duplicate key detected: foo/i');
         $csv->toArray();
     }
 

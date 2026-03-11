@@ -101,6 +101,7 @@ class Reader extends AbstractCsv implements IteratorAggregate
             throw new RuntimeException('Failed to open file: ' . $this->file);
         }
         $this->lineNumber = 0;
+        $this->detectedKeys = [];
         while (true) {
             $fields = fgetcsv($csv, 0, $this->delimiterCharacter, $this->quoteCharacter, $this->escapeCharacter);
             if ($fields === false) {
