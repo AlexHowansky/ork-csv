@@ -109,7 +109,7 @@ abstract class AbstractCsv
         foreach ($this->callbacks as $callbacks) {
             foreach ((array) $callbacks as $callback) {
                 if (is_callable($callback) === false) {
-                    throw new UnexpectedValueException('Callback is not callable: ' . $callback);
+                    throw new UnexpectedValueException('Callback is not callable');
                 }
             }
         }
