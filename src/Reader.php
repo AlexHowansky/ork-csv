@@ -168,7 +168,7 @@ class Reader extends AbstractCsv implements IteratorAggregate
      */
     protected function map(array $row): array
     {
-        if (empty($this->columnNames) === true) {
+        if ($this->columnNames === []) {
             return $row;
         }
         if (count($this->columnNames) !== count($row)) {

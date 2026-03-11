@@ -143,7 +143,7 @@ class Writer extends AbstractCsv
     public function write(array $row): int
     {
         if ($this->lineNumber === 0 && $this->hasHeader === true) {
-            if (empty($this->columnNames) === true) {
+            if ($this->columnNames === []) {
                 $this->columnNames = array_keys($row);
             }
             if ($this->appendToExistingFile === false) {
