@@ -158,7 +158,7 @@ class Writer extends AbstractCsv
             }
         }
         $row = $this->applyCallbacks($row);
-        return $this->put(empty($this->columnNames) === true ? $row : $this->map($row));
+        return $this->put($this->columnNames === [] ? $row : $this->map($row));
     }
 
     /**

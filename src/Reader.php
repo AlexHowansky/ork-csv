@@ -108,7 +108,7 @@ class Reader extends AbstractCsv implements IteratorAggregate
                 break;
             }
             if ($this->lineNumber++ === 0 && $this->hasHeader === true) {
-                if (empty($this->columnNames) === true) {
+                if ($this->columnNames === []) {
                     $this->columnNames = $this->validateColumnNames($fields);
                 }
             } else {
