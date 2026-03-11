@@ -212,7 +212,7 @@ class WriterTest extends TestCase
     {
         $csv = new Writer(file: $this->getFile(), allowUnknownColumns: false);
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageMatches('/unknown column detected/i');
+        $this->expectExceptionMessageMatches('/unknown column detected: Extra/i');
         $csv->writeFrom([
             ['Id' => 1, 'Name' => 'foo', 'Number' => 123],
             ['Id' => 2, 'Name' => 'bar', 'Number' => 456],

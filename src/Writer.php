@@ -152,7 +152,7 @@ class Writer extends AbstractCsv
         }
         if ($this->allowUnknownColumns === false) {
             foreach (array_keys($row) as $columnName) {
-                if (array_key_exists($columnName, $this->columnNames) === false) {
+                if (in_array($columnName, $this->columnNames, true) === false) {
                     throw new RuntimeException('Unknown column detected: ' . $columnName);
                 }
             }
