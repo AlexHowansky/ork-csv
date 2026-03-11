@@ -20,7 +20,7 @@ use UnexpectedValueException;
 class Writer extends AbstractCsv
 {
 
-    protected $fileHandle;
+    protected mixed $fileHandle = null;
 
     /**
      * Constructor.
@@ -68,15 +68,15 @@ class Writer extends AbstractCsv
      *
      * @throws RuntimeException If the file cannot be created.
      */
-    protected function getFileHandle()
+    protected function getFileHandle(): mixed
     {
         if (is_resource($this->file) === true) {
             return $this->file;
         }
-        if (isset($this->fileHandle) === false) {
+        if ($this->fileHandle === null) {
             // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
             $this->fileHandle = @fopen($this->file, $this->appendToExistingFile === true ? 'a' : 'w');
-            if (is_resource($this->fileHandle) === false) {
+            if ($this->fileHandle === false) {
                 throw new RuntimeException('Failed to create file: ' . $this->file);
             }
         }
