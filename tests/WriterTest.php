@@ -34,12 +34,7 @@ class WriterTest extends TestCase
 
     protected function getFile(): string
     {
-        $bt = debug_backtrace();
-        return sprintf(
-            '%s/%s',
-            $this->vfs->url(),
-            $bt[1]['function'] === 'getFileContents' ? $bt[2]['function'] : $bt[1]['function']
-        );
+        return $this->vfs->url() . '/' . $this->name();
     }
 
     protected function getFileContents(): string

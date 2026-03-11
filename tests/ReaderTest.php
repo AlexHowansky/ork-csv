@@ -28,7 +28,7 @@ class ReaderTest extends TestCase
 
     protected function makeFile(string $content = "Id,Name,Number\n1,foo,123\n2,bar,456\n3,baz,789\n"): string
     {
-        $file = $this->vfs->url() . '/' . debug_backtrace()[1]['function'];
+        $file = $this->vfs->url() . '/' . $this->name();
         file_put_contents($file, $content);
         return $file;
     }
