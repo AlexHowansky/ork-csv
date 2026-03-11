@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.3.1
+
+* Better handling of the case where a column name contains what looks like a regex pattern.
+* Fixed a bug related to iterating more than once when detectDuplicateKeys was set.
+* Fixed a bug that prevented allowUnknownColumns from working correctly.
+* Made some minor efficiency improvements.
+
 ## 2.3.0
 
 * Updated to require PHP 8.2 and support PHP 8.5.
