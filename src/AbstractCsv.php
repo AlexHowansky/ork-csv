@@ -114,13 +114,13 @@ abstract class AbstractCsv
             }
         }
         $this->columnNames = $this->validateColumnNames($this->columnNames);
-        if (strlen($this->delimiterCharacter) > 1) {
+        if (strlen($this->delimiterCharacter) !== 1) {
             throw new UnexpectedValueException('delimiterCharacter must be a single character');
         }
-        if (strlen($this->escapeCharacter) > 1) {
+        if (strlen($this->escapeCharacter) !== 1) {
             throw new UnexpectedValueException('escapeCharacter must be a single character');
         }
-        if (strlen($this->quoteCharacter) > 1) {
+        if (strlen($this->quoteCharacter) !== 1) {
             throw new UnexpectedValueException('quoteCharacter must be a single character');
         }
     }

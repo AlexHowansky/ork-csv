@@ -640,6 +640,27 @@ class ReaderTest extends TestCase
         $this->assertEquals([123, 456, 789], iterator_to_array($csv->getColumn('Number')));
     }
 
+    public function testShortStringDelimiter(): void
+    {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('must be a single character');
+        new Reader(delimiterCharacter: '');
+    }
+
+    public function testShortStringEscape(): void
+    {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('must be a single character');
+        new Reader(escapeCharacter: '');
+    }
+
+    public function testShortStringQuote(): void
+    {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('must be a single character');
+        new Reader(quoteCharacter: '');
+    }
+
     /**
      * Test that we can read from STDIN.
      */
