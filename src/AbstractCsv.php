@@ -52,7 +52,7 @@ abstract class AbstractCsv
                 foreach (array_keys($row) as $key) {
                     if (preg_match($column, (string) $key) === 1) {
                         foreach ((array) $callbacks as $callback) {
-                            $row[$key] = call_user_func($callback, $row[$key]);
+                            $row[$key] = $callback($row[$key]);
                         }
                     }
                 }
@@ -63,7 +63,7 @@ abstract class AbstractCsv
             // (or indexed) column.
             if (array_key_exists($column, $row) === true) {
                 foreach ((array) $callbacks as $callback) {
-                    $row[$column] = call_user_func($callback, $row[$column]);
+                    $row[$column] = $callback($row[$column]);
                 }
             }
 

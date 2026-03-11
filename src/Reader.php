@@ -155,7 +155,7 @@ class Reader extends AbstractCsv implements IteratorAggregate
     public function getWhere(callable $filter): Generator
     {
         foreach ($this as $row) {
-            if (call_user_func($filter, $row) === true) {
+            if ($filter($row) === true) {
                 yield $row;
             }
         }
