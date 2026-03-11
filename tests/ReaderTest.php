@@ -47,6 +47,27 @@ class ReaderTest extends TestCase
     }
 
     /**
+     * Test that callbacks don't fire twice for column names that look like a
+     * regex pattern.
+     */
+    public function testCallbacksDoNotFireTwice(): void
+    {
+        $file = $this->makeFile("Id,/Name\n1,foo\n2,bar\n3,baz\n");
+        $csv = new Reader(
+            file: $file,
+            callbacks: ['/Name' => 'strrev'],
+        );
+        $this->assertEquals(
+            [
+                ['Id' => 1, '/Name' => 'oof'],
+                ['Id' => 2, '/Name' => 'rab'],
+                ['Id' => 3, '/Name' => 'zab'],
+            ],
+            $csv->toArray()
+        );
+    }
+
+    /**
      * Test that we can specify callbacks for columns that might not exist.
      */
     public function testCallbacksOnMissingColumn(): void

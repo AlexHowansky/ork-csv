@@ -45,10 +45,10 @@ abstract class AbstractCsv
     {
         foreach ($this->callbacks as $column => $callbacks) {
 
-            // If the column name of the callback starts with a slash, we'll
-            // interpret it as a regex and apply the callback to all the row
-            // columns that match the pattern.
-            if (str_starts_with((string) $column, '/') === true) {
+            // If the column name of the callback is a valid regex pattern,
+            // we'll apply the callback to all the columns that match.
+            // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+            if (@preg_match($column, '') !== false) {
                 foreach (array_keys($row) as $key) {
                     if (preg_match($column, (string) $key) === 1) {
                         foreach ((array) $callbacks as $callback) {
@@ -56,9 +56,11 @@ abstract class AbstractCsv
                         }
                     }
                 }
+                continue;
             }
 
-            // Apply this callback to one explicitly named (or indexed) column.
+            // Otherwise, we'll apply the callback to the one explicitly named
+            // (or indexed) column.
             if (array_key_exists($column, $row) === true) {
                 foreach ((array) $callbacks as $callback) {
                     $row[$column] = call_user_func($callback, $row[$column]);
