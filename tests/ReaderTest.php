@@ -225,6 +225,15 @@ class ReaderTest extends TestCase
         (new Reader($file))->toArray();
     }
 
+    public function testColumnNamedZero(): void
+    {
+        $file = $this->makeFile("Foo,Bar,0\n1,2,3\n");
+        $this->assertEquals(
+            ['Foo' => 1, 'Bar' => 2, 0 => 3],
+            (new Reader($file))->getIterator()->current()
+        );
+    }
+
     /**
      * Test that custom delimiter characters work.
      */

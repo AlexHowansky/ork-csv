@@ -176,7 +176,7 @@ class Reader extends AbstractCsv implements IteratorAggregate
         }
         return array_filter(
             array_combine($this->columnNames, $row),
-            fn(string $key): bool => empty($key) === false,
+            fn(string $key): bool => $key !== '',
             ARRAY_FILTER_USE_KEY
         );
     }
