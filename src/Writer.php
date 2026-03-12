@@ -20,8 +20,6 @@ use UnexpectedValueException;
 class Writer extends AbstractCsv
 {
 
-    protected mixed $fileHandle = null;
-
     /**
      * Constructor.
      *
@@ -49,38 +47,6 @@ class Writer extends AbstractCsv
         protected string $escapeCharacter = '\\',
     ) {
         $this->validateParameters();
-    }
-
-    /**
-     * Make sure the file is closed.
-     */
-    public function __destruct()
-    {
-        if (is_resource($this->fileHandle) === true) {
-            fclose($this->fileHandle);
-        }
-    }
-
-    /**
-     * Get the CSV file handle, creating the associated file if it doesn't already exist.
-     *
-     * @return resource The CSV file handle.
-     *
-     * @throws RuntimeException If the file cannot be created.
-     */
-    protected function getFileHandle(): mixed
-    {
-        if (is_resource($this->file) === true) {
-            return $this->file;
-        }
-        if ($this->fileHandle === null) {
-            // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-            $this->fileHandle = @fopen($this->file, $this->appendToExistingFile === true ? 'a' : 'w');
-            if ($this->fileHandle === false) {
-                throw new RuntimeException('Failed to create file: ' . $this->file);
-            }
-        }
-        return $this->fileHandle;
     }
 
     /**
@@ -119,7 +85,7 @@ class Writer extends AbstractCsv
     {
         ++$this->lineNumber;
         $result = fputcsv(
-            $this->getFileHandle(),
+            $this->getFileHandle($this->appendToExistingFile === true ? 'a' : 'w'),
             $row,
             $this->delimiterCharacter,
             $this->quoteCharacter,

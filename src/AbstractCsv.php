@@ -28,11 +28,35 @@ abstract class AbstractCsv
 
     protected string $escapeCharacter;
 
+    /**
+     * The user-supplied file reference. Either a string URI or an already open
+     * file handle.
+     *
+     * @var string|resource $file
+     */
     protected mixed $file;
+
+    /**
+     * If the user supplied a string URI, we'll open it and store the associated
+     * file handle here.
+     *
+     * @var ?resource $fileHandle
+     */
+    protected mixed $fileHandle = null;
 
     protected int $lineNumber = 0;
 
     protected string $quoteCharacter;
+
+    /**
+     * Make sure we close any file handle that we opened.
+     */
+    public function __destruct()
+    {
+        if (is_resource($this->fileHandle) === true) {
+            fclose($this->fileHandle);
+        }
+    }
 
     /**
      * Apply callbacks to a row.
@@ -69,6 +93,30 @@ abstract class AbstractCsv
 
         }
         return $row;
+    }
+
+    /**
+     * Get a handle for the CSV file if we don't already have one.
+     *
+     * @param string $mode The file mode to open the file with.
+     *
+     * @return resource The CSV file handle.
+     *
+     * @throws RuntimeException If the file cannot be opened.
+     */
+    protected function getFileHandle(string $mode = 'r'): mixed
+    {
+        if (is_resource($this->file) === true) {
+            return $this->file;
+        }
+        if ($this->fileHandle === null) {
+            // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+            $this->fileHandle = @fopen($this->file, $mode);
+            if ($this->fileHandle === false) {
+                throw new RuntimeException('Failed to open file: ' . $this->file);
+            }
+        }
+        return $this->fileHandle;
     }
 
     /**

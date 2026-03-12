@@ -356,9 +356,12 @@ class ReaderTest extends TestCase
         $this->assertSame(2, $csv->getLineNumber());
 
         // Consume the whole file and make sure we still have columns available.
-        $csv->toArray();
+        $this->assertCount(3, $csv->toArray());
         $this->assertSame($expect, $csv->getColumnNames());
         $this->assertSame(4, $csv->getLineNumber());
+
+        // Consume the whole file again.
+        $this->assertCount(3, $csv->toArray());
     }
 
     /**

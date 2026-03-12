@@ -95,15 +95,19 @@ class Reader extends AbstractCsv implements IteratorAggregate
      */
     public function getIterator(): Generator
     {
-        // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-        $csv = is_resource($this->file) === true ? $this->file : @fopen($this->file, 'r');
-        if ($csv === false) {
-            throw new RuntimeException('Failed to open file: ' . $this->file);
-        }
         $this->lineNumber = 0;
         $this->detectedKeys = [];
+        if (stream_get_meta_data($this->getFileHandle())['seekable'] === true) {
+            rewind($this->getFileHandle());
+        }
         while (true) {
-            $fields = fgetcsv($csv, 0, $this->delimiterCharacter, $this->quoteCharacter, $this->escapeCharacter);
+            $fields = fgetcsv(
+                $this->getFileHandle(),
+                0,
+                $this->delimiterCharacter,
+                $this->quoteCharacter,
+                $this->escapeCharacter
+            );
             if ($fields === false) {
                 break;
             }
@@ -120,7 +124,6 @@ class Reader extends AbstractCsv implements IteratorAggregate
                 }
             }
         }
-        fclose($csv);
     }
 
     /**

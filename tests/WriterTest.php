@@ -132,7 +132,7 @@ class WriterTest extends TestCase
     public function testCreateFileFails(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageMatches('/failed to create file/i');
+        $this->expectExceptionMessageMatches('/failed to open file/i');
         (new Writer('php://foo'))->write([]);
     }
 

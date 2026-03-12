@@ -2,9 +2,11 @@
 
 ## 2.3.1
 
-* Better handling of the case where a column name contains what looks like a regex pattern.
-* Fixed a bug related to iterating more than once when detectDuplicateKeys was set.
-* Fixed a bug that prevented allowUnknownColumns from working correctly.
+* Better detection of regex patterns for `callbacks` column names.
+* Fixed a bug related to iterating more than once when `detectDuplicateKeys` was set.
+* Fixed a bug that prevented `allowUnknownColumns` from working correctly.
+* Fixed a bug that prevented columns from being named `0`.
+* Updated `Reader` to no longer close handles that were given to it already open.
 * Made some minor efficiency improvements.
 
 ## 2.3.0
