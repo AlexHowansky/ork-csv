@@ -2,8 +2,8 @@
 <ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
     <rule ref="Ork"/>
     <rule ref="PHPCompatibility"/>
-    <config name="php_version" value="80133"/>
-    <config name="testVersion" value="8.1-"/>
+    <config name="php_version" value="80232"/>
+    <config name="testVersion" value="8.2-"/>
     <file>src</file>
     <file>tests</file>
 </ruleset>
