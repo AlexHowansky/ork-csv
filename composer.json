@@ -17,12 +17,12 @@
     },
     "require-dev": {
         "mikey179/vfsstream": "^1.6.12",
-        "ork/phpcs": "^3.0.1",
+        "ork/phpcs": "^3.0.2",
         "phpcompatibility/php-compatibility": "^10.0.0@dev",
-        "phpmetrics/phpmetrics": "^2.9.1",
-        "phpstan/phpstan": "^2.2.5",
+        "phpmetrics/phpmetrics": "^2.10.0",
+        "phpstan/phpstan": "^2.2.8",
         "phpunit/phpunit": "^11.5.56",
-        "rector/rector": "^2.5.7",
+        "rector/rector": "^2.6.1",
         "roave/security-advisories": "dev-master"
     },
     "autoload": {
