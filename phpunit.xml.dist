@@ -3,6 +3,7 @@
   bootstrap="vendor/autoload.php"
   cacheDirectory=".phpunit.cache"
   colors="true"
+  displayDetailsOnTestsThatTriggerDeprecations="true"
   testdox="true"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
